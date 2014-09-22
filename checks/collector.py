@@ -10,7 +10,7 @@ import socket
 
 import modules
 
-from util import get_os, get_uuid, md5, Timer, get_hostname, EC2, GCE
+from util import get_os, md5, Timer, get_hostname, EC2, GCE
 from config import get_version, get_system_stats
 
 import checks.system.unix as u
@@ -418,7 +418,6 @@ class Collector(object):
             'service_checks': [],
             'resources': {},
             'internalHostname' : self.hostname,
-            'uuid' : get_uuid(),
             'host-tags': {},
         }
 
