@@ -130,6 +130,10 @@ class Collector(object):
         """
         Collect data from each check and submit their data.
         """
+        counter = 0
+        def debugmsg(msg, obj):
+            log.debug(u"{0:05d} | {1} | {2}".format(counter, msg, obj))
+            counter += 1
         timer = Timer()
         if self.os != 'windows':
             cpu_clock = time.clock()
@@ -137,22 +141,37 @@ class Collector(object):
         log.debug("Starting collection run #%s" % self.run_count)
 
         payload = self._build_payload(start_event=start_event)
+        debugmsg("payload", payload)
         metrics = payload['metrics']
+        debugmsg("metrics", metrics)
+        events = payload['events']
+        debugmsg("events", events)
         events = payload['events']
         service_checks = payload['service_checks']
+        debugmsg("service_checks", service_checks)
+        debugmsg("checksd", checksd)
         if checksd:
             self.initialized_checks_d = checksd['initialized_checks'] # is of type {check_name: check}
             self.init_failed_checks_d = checksd['init_failed_checks'] # is of type {check_name: {error, traceback}}
         # Run the system checks. Checks will depend on the OS
+        debugmsg("self.os", self.os)
         if self.os == 'windows':
             # Win32 system checks
             try:
+                debugmsg("agentconfig", self.agentConfig)
                 metrics.extend(self._win32_system_checks['disk'].check(self.agentConfig))
+                debugmsg("win32systemcheck", 'disk')
                 metrics.extend(self._win32_system_checks['memory'].check(self.agentConfig))
+                debugmsg("win32systemcheck", 'memory')
                 metrics.extend(self._win32_system_checks['cpu'].check(self.agentConfig))
+                debugmsg("win32systemcheck", 'cpu')
                 metrics.extend(self._win32_system_checks['network'].check(self.agentConfig))
+                debugmsg("win32systemcheck", 'network')
                 metrics.extend(self._win32_system_checks['io'].check(self.agentConfig))
+                debugmsg("win32systemcheck", 'io')
                 metrics.extend(self._win32_system_checks['proc'].check(self.agentConfig))
+                debugmsg("win32systemcheck", 'proc')
+                debugmsg("newwindowsmetrics", metrics)
             except Exception:
                 log.exception('Unable to fetch Windows system metrics.')
         else:
@@ -204,6 +223,7 @@ class Collector(object):
 
         if gangliaData is not False and gangliaData is not None:
             payload['ganglia'] = gangliaData
+            debugmsg('gangliadata', gangliaData)
 
         # dogstream
         if dogstreamData:
@@ -216,10 +236,12 @@ class Collector(object):
                 del dogstreamData['dogstreamEvents']
 
             payload.update(dogstreamData)
+            debugmsg('dogstreamdata', dogstreamData)
 
         # metrics about the forwarder
         if ddforwarderData:
             payload['datadog'] = ddforwarderData
+            debugmsg('forwarderdata', ddforwarderData)
 
         # Resources checks
         if self.os != 'windows':
@@ -247,6 +269,7 @@ class Collector(object):
             res = metrics_check.check(self.agentConfig)
             if res:
                 metrics.extend(res)
+            debugmsg('newerstylecheck', res)
 
         # checks.d checks
         check_statuses = []
@@ -262,6 +285,7 @@ class Collector(object):
             try:
                 # Run the check.
                 instance_statuses = check.run()
+                debugmsg('check_ran', instances_statuses)
 
                 # Collect the metrics and events.
                 current_check_metrics = check.get_metrics()
@@ -364,6 +388,7 @@ class Collector(object):
             payload['metrics'].extend(self._agent_metrics.check(payload, self.agentConfig,
                 collect_duration, self.emit_duration))
 
+        debugmsg('payloadat the end', payload)
 
         emitter_statuses = self._emit(payload)
         self.emit_duration = timer.step()
