@@ -185,6 +185,8 @@ class MongoDb(AgentCheck):
             "db:%s" % db_name
         ]
 
+        self.log.debug("Using database %s" % db_name)
+
         nodelist = parsed.get('nodelist')
         if nodelist:
             host = nodelist[0][0]
@@ -203,7 +205,8 @@ class MongoDb(AgentCheck):
             conn = pymongo.Connection(server, network_timeout=DEFAULT_TIMEOUT,
                 **ssl_params)
             db = conn[db_name]
-        except Exception:
+        except Exception as e:
+            self.log.debug("Exception when trying to connect %s" % e)
             self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.CRITICAL, tags=service_check_tags)
             raise
 
@@ -216,10 +219,12 @@ class MongoDb(AgentCheck):
         self.service_check(self.SERVICE_CHECK_NAME, AgentCheck.OK, tags=service_check_tags)
 
         status = db["$cmd"].find_one({"serverStatus": 1})
+        self.log.debug("serverStatus returned %s" % status)
         if status['ok'] == 0:
             raise Exception(status['errmsg'].__str__())
 
         status['stats'] = db.command('dbstats')
+        self.log.debug("dbstats returned %s" % status['stats'])
 
         # Handle replica data, if any
         # See http://www.mongodb.org/display/DOCS/Replica+Set+Commands#ReplicaSetCommands-replSetGetStatus
@@ -227,6 +232,7 @@ class MongoDb(AgentCheck):
             data = {}
 
             replSet = db.command('replSetGetStatus')
+            self.log.debug("replSetGetStatus returned %s" % replSet)
             if replSet:
                 primary = None
                 current = None
@@ -255,6 +261,7 @@ class MongoDb(AgentCheck):
                 self.check_last_state(data['state'], server, self.agentConfig)
                 status['replSet'] = data
         except Exception, e:
+            self.log.debug("error when handling replica data %s" % e)
             if "OperationFailure" in repr(e) and "replSetGetStatus" in str(e):
                 pass
             else:
@@ -272,13 +279,15 @@ class MongoDb(AgentCheck):
 
         # Go through the metrics and save the values
         for m in self.METRICS:
+            self.log.debug("processing metric %s" % m)
             # each metric is of the form: x.y.z with z optional
             # and can be found at status[x][y][z]
             value = status
             try:
                 for c in m.split("."):
                     value = value[c]
-            except KeyError:
+            except KeyError as e:
+                self.log.debug("error when getting key %s" % e)
                 continue
 
             # value is now status[x][y][z]
@@ -287,8 +296,12 @@ class MongoDb(AgentCheck):
             # Check if metric is a gauge or rate
             if m in self.GAUGES:
                 m = self.normalize(m.lower(), 'mongodb')
+                self.log.debug("gauge value %s %s" % (m, str(value)))
+                self.log.debug("tags: {0}".format(tags))
                 self.gauge(m, value, tags=tags)
 
             if m in self.RATES:
                 m = self.normalize(m.lower(), 'mongodb') + "ps"
+                self.log.debug("rate value %s %s" % (m, str(value)))
+                self.log.debug("tags {0}".format(tags))
                 self.rate(m, value, tags=tags)
