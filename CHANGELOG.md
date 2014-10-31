@@ -50,9 +50,17 @@ Changes
 * [FEATURE] Add a check to collect metrics at the core level.
 * [FEATURE] Add a check to collect metrics from BTRFS. See [#1123][]
 * [FEATURE] Add a check to collect system core metrics. See [#1124][]
+* [FEATURE] DogStatsD recognizes and uses `host` and `device` tags as metric attributes. See [#1164][].
 * [BUGGIX] Jenkins: Fix when build does not yet have results. See [#1060][] (Thanks [@jzoldak][])
 * [BUGFIX] PostgreSQL: If connection drops, re-establish at next run. See [#1105][]
 * [BUGFIX] MongoDB: Add logging of serverStatus errors. See [#1065][] (Thanks [@igroenewold][])
+
+# 5.0.5 (Every platform) / 10-31-2014
+
+This release fixes a bug on servers that are configured in local time instead of UTC Time.
+If your server's clock is configured to use daylight saving time, your server might stop sending metrics for up to one hour when the Daylight Saving Time ends or until the Agent is restarted after the Daylight Saving Time ends.
+
+We highly recommend to upgrade to this version if your server is configured in local time.
 
 # 5.0.4 (deb package, rpm package) / 10-17-2014
 
@@ -97,6 +105,14 @@ This release has multiple fixes, see the list below.
 Warning: The way CPU metrics are collected has changed and will be more accurate, you might see some changes in the graphs.
 
 ### What will break ?
+* MySQL integration: If you see this error: ```OperationalError(2003, 'Can\'t connect to MySQL server on \'localhost\' ((1045, u"Access denied for user \'datadog\'@\'127.0.0.1\'...)```
+the Datadog user will need to be modified from ```'datadog'@'localhost'``` to ``` 'datadog'@'127.0.0.1' ``` (your host IP). You can do this by running:
+
+       ```
+           $ mysql -p mysql
+           # UPDATE user SET Host = '127.0.0.1' WHERE User = 'datadog';
+           # FLUSH PRIVILEGES;
+       ```
 * If you were using a custom check that needed python dependencies you will have to reinstall them using the bundled pip:
      
        ```

@@ -1,22 +1,24 @@
 require './ci/common'
 
 namespace :ci do
-  namespace :cassandra do
+  namespace :ssh do
     task :before_install => ['ci:common:before_install'] do
-      sh %Q{curl http://apache.mesi.com.ar/cassandra/2.0.11/apache-cassandra-2.0.11-bin.tar.gz | tar -C /tmp -xz}
+      apt_update
     end
 
-    task :install => ['ci:common:install']
+    task :install => ['ci:common:install'] do
+      # Should be alreday there on Travis though
+      sh %Q{sudo apt-get install openssh-server}
+    end
 
     task :before_script => ['ci:common:before_script'] do
-      sh %Q{sudo /tmp/apache-cassandra-2.0.11/bin/cassandra}
-      # Wait for cassandra to init
-      sh %Q{sleep 10}
+      # Create test/test account
+      sh %Q{sudo useradd -m -p $(perl -e 'print crypt("test", "password")') test}
     end
 
     task :script => ['ci:common:script'] do
       this_provides = [
-        'cassandra',
+        'ssh',
       ]
       Rake::Task['ci:common:run_tests'].invoke(this_provides)
     end
