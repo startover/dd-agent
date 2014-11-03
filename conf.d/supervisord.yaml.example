@@ -1,14 +1,30 @@
+#
+#   To get started with the supervisord check, you need to have
+#   inet_http_server configured in your /etc/supervisord.conf, and then
+#   reload supervisorctl. Below is an example configuration:
+#
+#       [inet_http_server]
+#       port:localhost:9001
+#       username:user  # optional
+#       password:pass  # optional
+#
+#  Then specify the server connection information in this yaml file. You may
+#  also specify which processes you'd like to monitor in each supervisord
+#  instance.
+#
+
 init_config:
 
 instances:
-    - name: server0
-      host: localhost
-      port: 9001
-      user: user # optional
-      pass: pass # optional
-      proc_names: # optional. will monitor all processes if not specified
-       - apache2
-       - custom_app
-       - etc
-    - name: server1
-      etc
+#   - name: server0    # Required. An arbitrary name to identify the supervisord server
+#     host: localhost  # Optional. Defaults to localhost. The host where supervisord server is running
+#     port: 9001       # Optional. Defaults to 9001. The port number.
+#     user: user       # Optional. Required only if a username is configured.
+#     pass: pass       # Optional. Required only if a password is configured.
+#     proc_names:      # Optional. The process to monitor within this supervisord instance.
+#      - apache2       #           If not specified, the check will monitor all processes.
+#      - webapp
+#      - java
+#    - name: server1
+#      host: localhost
+#      port: 9002

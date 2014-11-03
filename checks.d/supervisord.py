@@ -1,3 +1,4 @@
+import socket
 import time
 
 from checks import AgentCheck
@@ -29,31 +30,53 @@ PROCESS_STATUS = {
     UNKNOWN: 'unknown'
 }
 
-TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-
-
-def time_formatter(s):
-    return time.strftime(TIME_FORMAT, time.localtime(s))
+FORMAT_TIME = lambda x: time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x))
 
 
 class SupervisordCheck(AgentCheck):
 
     def check(self, instance):
         server_name = instance.get('name', DEFAULT_SERVER)
-        server = self._connect(instance)
-        count = {
+        supervisor = self._connect(instance)
+        count_by_status = {
             AgentCheck.OK: 0,
             AgentCheck.CRITICAL: 0,
             AgentCheck.UNKNOWN: 0
         }
 
-        # Report service checks and uptime for each process
-        proc_names = instance.get('proc_names')
-        if proc_names and len(proc_names):
-            processes = [server.supervisor.getProcessInfo(p) for p in proc_names]
-        else:
-            processes = server.supervisor.getAllProcessInfo()
+        # Grab process information
+        try:
+            proc_names = instance.get('proc_names')
+            if proc_names and len(proc_names):
+                processes = []
+                for proc_name in proc_names:
+                    try:
+                        processes.append(supervisor.getProcessInfo(proc_name))
+                    except xmlrpclib.Fault, e:
+                        if e.faultCode == 10:
+                            self.log.warn('Process not found: %s' % proc_name)
+                        else:
+                            raise Exception('An error occurred while reading'
+                                            'process %s information: %s %s'
+                                            % (proc_name, e.faultCode, e.faultString))
+            else:
+                processes = supervisor.getAllProcessInfo()
+        except socket.error:
+            host = instance.get('host', DEFAULT_HOST)
+            port = instance.get('port', DEFAULT_PORT)
+            raise Exception('Cannot connect to http://%s:%s.\n'
+                            'Make sure supervisor is running and XML-RPC '
+                            'inet interface is enabled.' % (host, port))
+        except xmlrpclib.ProtocolError, e:
+            instance_name = instance.get('name')
+            if e.errcode == 401:
+                raise Exception('Username or password to %s are incorrect.' %
+                                instance_name)
+            else:
+                raise Exception('An error occurred while connecting to %s: '
+                                '%s %s ' % (instance_name, e.errcode, e.errmsg))
 
+        # Report service checks and uptime for each process
         for proc in processes:
             proc_name = proc['name']
             tags = ['supervisord',
@@ -63,7 +86,7 @@ class SupervisordCheck(AgentCheck):
             # Report Service Check
             status = DD_STATUS[proc['statename']]
             msg = self._build_message(proc)
-            count[status] += 1
+            count_by_status[status] += 1
             self.service_check('supervisord.process.check',
                                status, tags=tags, message=msg)
             # Report Uptime
@@ -72,19 +95,22 @@ class SupervisordCheck(AgentCheck):
 
         # Report counts by status
         tags = ['supervisord', 'server:%s' % server_name]
-        for proc_status in PROCESS_STATUS:
-            self.gauge('supervisord.process.count', count[proc_status],
-                       tags=tags + ['status:%s' % PROCESS_STATUS[proc_status]])
+        for status in PROCESS_STATUS:
+            self.gauge('supervisord.process.count', count_by_status[status],
+                       tags=tags + ['status:%s' % PROCESS_STATUS[status]])
 
-    def _connect(self, instance):
+    @staticmethod
+    def _connect(instance):
         host = instance.get('host', DEFAULT_HOST)
         port = instance.get('port', DEFAULT_PORT)
-        user = instance.get('user', None)
-        password = instance.get('pass', None)
+        user = instance.get('user')
+        password = instance.get('pass')
         auth = '%s:%s@' % (user, password) if user and password else ''
-        return xmlrpclib.Server('http://%s%s:%s/RPC2' % (auth, host, port))
+        server = xmlrpclib.Server('http://%s%s:%s/RPC2' % (auth, host, port))
+        return server.supervisor
 
-    def _extract_uptime(self, proc):
+    @staticmethod
+    def _extract_uptime(proc):
         desc = proc['description']
         if proc['statename'] == 'RUNNING' and 'uptime' in desc:
             h, m, s = desc.split('uptime ')[1].split(':')
@@ -93,11 +119,12 @@ class SupervisordCheck(AgentCheck):
             start, stop, now = int(proc['start']), int(proc['stop']), int(proc['now'])
             return 0 if stop >= start else now - start
 
-    def _build_message(self, proc):
+    @staticmethod
+    def _build_message(proc):
         start, stop, now = int(proc['start']), int(proc['stop']), int(proc['now'])
-        proc['now_str'] = time_formatter(now)
-        proc['start_str'] = time_formatter(start)
-        proc['stop_str'] = '' if stop == 0 else time_formatter(stop)
+        proc['now_str'] = FORMAT_TIME(now)
+        proc['start_str'] = FORMAT_TIME(start)
+        proc['stop_str'] = '' if stop == 0 else FORMAT_TIME(stop)
 
         return """Current time: %(now_str)s
 Process name: %(name)s
