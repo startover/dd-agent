@@ -183,6 +183,7 @@ instances:
     ### Integration Test #####################################################
 
     def test_check(self):
+        """Integration test to test supervisord check."""
         for tc in self.TEST_CASES:
             check, instances = get_check('supervisord', tc['yaml'])
             ok_(check is not None, msg=check)
@@ -195,9 +196,9 @@ instances:
                     check.check(instance)
                 except Exception, e:
                     if tc['error_message']:  # excepted error
-                        eq_(e.message, tc['error_message'])
+                        eq_(str(e), tc['error_message'])
                     else:
-                        ok_(False, msg=e.message)
+                        ok_(False, msg=str(e))
                 else:
                     # Assert that the check collected the right metrics
                     expected_metrics = tc['expected_metrics'][name]
@@ -211,7 +212,7 @@ instances:
     ### Unit Tests ###########################################################
 
     def test_build_message(self):
-        """Unit test build service check message."""
+        """Unit test supervisord build service check message."""
         process = {
             'now': 1414815513,
             'group': 'mysql',
