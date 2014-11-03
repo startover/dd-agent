@@ -1,16 +1,31 @@
 #
-#   To get started with the supervisord check, you need to have
-#   inet_http_server configured in your /etc/supervisord.conf, and then
-#   reload supervisorctl. Below is an example configuration:
+#   There are two ways to get started with the supervisord check.
+#
+#   You can configure inet_http_server in /etc/supervisord.conf. Below is an
+#   example inet_http_server configuration:
 #
 #       [inet_http_server]
 #       port:localhost:9001
 #       username:user  # optional
 #       password:pass  # optional
 #
-#  Then specify the server connection information in this yaml file. You may
-#  also specify which processes you'd like to monitor in each supervisord
-#  instance.
+#   OR, you can use supervisorctl socket to communicate with supervisor.
+#   If supervisor is running as root, make sure chmod property is set
+#   to a permission accessible to non-root users. See the example below:
+#
+#       [supervisorctl]
+#       serverurl=unix:///var/run//supervisor.sock
+#
+#       [unix_http_server]
+#       file=/var/run/supervisor.sock
+#       chmod=777
+#
+#  Reload supervsior, specify the inet or unix socket server information
+#  in this yaml file along with an optional list of the processes you want
+#  to monitor per instance, and you're good to go!
+#
+#  See http://supervisord.org/configuration.html for more information on
+#  configuring supervisord sockets and inet http servers.
 #
 
 init_config:
@@ -25,6 +40,9 @@ instances:
 #      - apache2       #           If not specified, the check will monitor all processes.
 #      - webapp
 #      - java
-#    - name: server1
-#      host: localhost
-#      port: 9002
+#   - name: server1
+#     host: localhost
+#     port: 9002
+#   - name: server2
+#     socket: unix:///var/run//supervisor.sock
+#     host: http://127.0.0.1        # Optional. Defaults to http://127.0.0.1

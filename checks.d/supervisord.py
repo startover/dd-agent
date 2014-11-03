@@ -1,13 +1,16 @@
 import socket
 import time
+import xmlrpclib
+
+import supervisor.xmlrpc
 
 from checks import AgentCheck
 
-import xmlrpclib
 
 DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'
 DEFAULT_SERVER = 'server'
+DEFAULT_SOCKET_IP = 'http://127.0.0.1'
 
 OK = AgentCheck.OK
 CRITICAL = AgentCheck.CRITICAL
@@ -101,12 +104,18 @@ class SupervisordCheck(AgentCheck):
 
     @staticmethod
     def _connect(instance):
-        host = instance.get('host', DEFAULT_HOST)
-        port = instance.get('port', DEFAULT_PORT)
-        user = instance.get('user')
-        password = instance.get('pass')
-        auth = '%s:%s@' % (user, password) if user and password else ''
-        server = xmlrpclib.Server('http://%s%s:%s/RPC2' % (auth, host, port))
+        sock = instance.get('socket')
+        if sock is not None:
+            host = instance.get('host', DEFAULT_SOCKET_IP)
+            transport = supervisor.xmlrpc.SupervisorTransport(None, None, sock)
+            server = xmlrpclib.ServerProxy(host, transport=transport)
+        else:
+            host = instance.get('host', DEFAULT_HOST)
+            port = instance.get('port', DEFAULT_PORT)
+            user = instance.get('user')
+            password = instance.get('pass')
+            auth = '%s:%s@' % (user, password) if user and password else ''
+            server = xmlrpclib.Server('http://%s%s:%s/RPC2' % (auth, host, port))
         return server.supervisor
 
     @staticmethod

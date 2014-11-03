@@ -409,7 +409,7 @@ class MockSupervisor:
         raise Exception('Process not found: %s' % proc_name)
 
     def _validate_request(self, proc=None):
-        '''Validates request simulates errors when not valid'''
+        '''Validates request and simulates errors when not valid'''
         if 'invalid_host' in self.url:
             # Simulate connecting to an invalid host/port in order to
             # raise `socket.error: [Errno 111] Connection refused`
