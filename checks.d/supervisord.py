@@ -120,12 +120,10 @@ class SupervisordCheck(AgentCheck):
 
     @staticmethod
     def _extract_uptime(proc):
-        desc = proc['description']
-        if proc['statename'] == 'RUNNING' and 'uptime' in desc:
-            h, m, s = desc.split('uptime ')[1].split(':')
-            return int(s) + 60 * (int(m) + 60 * int(h))
+        start, stop, now = int(proc['start']), int(proc['stop']), int(proc['now'])
+        if proc['statename'] == 'RUNNING' and stop == 0:
+            return now - start
         else:
-            start, stop, now = int(proc['start']), int(proc['stop']), int(proc['now'])
             return 0 if stop >= start else now - start
 
     @staticmethod
