@@ -40,7 +40,7 @@ class SupervisordCheck(AgentCheck):
 
     def check(self, instance):
         server_name = instance.get('name', DEFAULT_SERVER)
-        server_check = instance.get('server_check', False)
+        server_check = instance.get('server_check', True)
         supervisor = self._connect(instance)
         count_by_status = {
             AgentCheck.OK: 0,
