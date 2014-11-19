@@ -40,6 +40,7 @@ class SupervisordCheck(AgentCheck):
 
     def check(self, instance):
         server_name = instance.get('name', DEFAULT_SERVER)
+        conn_service_check = instance.get('conn_service_check', False)
         supervisor = self._connect(instance)
         count_by_status = {
             AgentCheck.OK: 0,
@@ -67,6 +68,12 @@ class SupervisordCheck(AgentCheck):
         except socket.error:
             host = instance.get('host', DEFAULT_HOST)
             port = instance.get('port', DEFAULT_PORT)
+            if conn_service_check:  # Report connection failure
+                message = 'Supervisord server %s is down.' % server_name
+                self.service_check('supervisord.process.check', CRITICAL,
+                                   tags=['supervisord',
+                                         'server:%s' % server_name],
+                                   message=message)
             raise Exception('Cannot connect to http://%s:%s.\n'
                             'Make sure supervisor is running and XML-RPC '
                             'inet interface is enabled.' % (host, port))
