@@ -127,11 +127,10 @@ class SupervisordCheck(AgentCheck):
 
     @staticmethod
     def _extract_uptime(proc):
-        start, stop, now = int(proc['start']), int(proc['stop']), int(proc['now'])
-        if proc['statename'] == 'RUNNING' and stop == 0:
-            return now - start
-        else:
-            return 0 if stop >= start else now - start
+        start, now = int(proc['start']), int(proc['now'])
+        status = proc['statename']
+        active_state = status in ['BACKOFF', 'RUNNING', 'STOPPING']
+        return now - start if active_state else 0
 
     @staticmethod
     def _build_message(proc):
