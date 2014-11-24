@@ -26,26 +26,26 @@ instances:
         }],
         'expected_metrics': {
             'server1': [
-                ('supervisord.process.count', 2, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'status:up']}),
-                ('supervisord.process.count', 1, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'status:down']}),
-                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'status:unknown']}),
-                ('supervisord.process.uptime', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'process:python']}),
-                ('supervisord.process.uptime', 125, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'process:mysql']}),
-                ('supervisord.process.uptime', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'process:java']})
+                ('supervisord.process.count', 2, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'status:up']}),
+                ('supervisord.process.count', 1, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'status:down']}),
+                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'status:unknown']}),
+                ('supervisord.process.uptime', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'supervisord_process:python']}),
+                ('supervisord.process.uptime', 125, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'supervisord_process:mysql']}),
+                ('supervisord.process.uptime', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'supervisord_process:java']})
             ]
         },
         'expected_service_checks': {
             'server1': [{
                 'status': AgentCheck.OK,
-                'tags': ['supervisord', 'server:server1', 'process:mysql'],
+                'tags': ['supervisord', 'supervisord_server:server1', 'supervisord_process:mysql'],
                 'check': 'supervisord.process.check'
             }, {
                 'status': AgentCheck.CRITICAL,
-                'tags': ['supervisord', 'server:server1', 'process:java'],
+                'tags': ['supervisord', 'supervisord_server:server1', 'supervisord_process:java'],
                 'check': 'supervisord.process.check'
             }, {
                 'status': AgentCheck.OK,
-                'tags': ['supervisord', 'server:server1', 'process:python'],
+                'tags': ['supervisord', 'supervisord_server:server1', 'supervisord_process:python'],
                 'check': 'supervisord.process.check'
             }]
         }
@@ -77,32 +77,32 @@ instances:
         }],
         'expected_metrics': {
             'server0': [
-                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'status:up']}),
-                ('supervisord.process.count', 2, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'status:down']}),
-                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'status:unknown']}),
-                ('supervisord.process.uptime', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'process:apache2']}),
-                ('supervisord.process.uptime', 2, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'process:webapp']}),
+                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'status:up']}),
+                ('supervisord.process.count', 2, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'status:down']}),
+                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'status:unknown']}),
+                ('supervisord.process.uptime', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'supervisord_process:apache2']}),
+                ('supervisord.process.uptime', 2, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'supervisord_process:webapp']}),
             ],
             'server1': [
-                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'status:up']}),
-                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'status:down']}),
-                ('supervisord.process.count', 1, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'status:unknown']}),
-                ('supervisord.process.uptime', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server1', 'process:ruby']})
+                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'status:up']}),
+                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'status:down']}),
+                ('supervisord.process.count', 1, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'status:unknown']}),
+                ('supervisord.process.uptime', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server1', 'supervisord_process:ruby']})
             ]
         },
         'expected_service_checks': {
             'server0': [{
                 'status': AgentCheck.CRITICAL,
-                'tags': ['supervisord', 'server:server0', 'process:apache2'],
+                'tags': ['supervisord', 'supervisord_server:server0', 'supervisord_process:apache2'],
                 'check': 'supervisord.process.check'
             }, {
                 'status': AgentCheck.CRITICAL,
-                'tags': ['supervisord', 'server:server0', 'process:webapp'],
+                'tags': ['supervisord', 'supervisord_server:server0', 'supervisord_process:webapp'],
                 'check': 'supervisord.process.check'
             }],
             'server1': [{
                 'status': AgentCheck.UNKNOWN,
-                'tags': ['supervisord', 'server:server1', 'process:ruby'],
+                'tags': ['supervisord', 'supervisord_server:server1', 'supervisord_process:ruby'],
                 'check': 'supervisord.process.check'
             }]
         }
@@ -158,16 +158,16 @@ instances:
         }],
         'expected_metrics': {
             'server0': [
-                ('supervisord.process.count', 1, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'status:up']}),
-                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'status:down']}),
-                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'status:unknown']}),
-                ('supervisord.process.uptime', 125, {'type': 'gauge', 'tags': ['supervisord', 'server:server0', 'process:mysql']})
+                ('supervisord.process.count', 1, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'status:up']}),
+                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'status:down']}),
+                ('supervisord.process.count', 0, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'status:unknown']}),
+                ('supervisord.process.uptime', 125, {'type': 'gauge', 'tags': ['supervisord', 'supervisord_server:server0', 'supervisord_process:mysql']})
             ]
         },
         'expected_service_checks': {
             'server0': [{
                 'status': AgentCheck.OK,
-                'tags': ['supervisord', 'server:server0', 'process:mysql'],
+                'tags': ['supervisord', 'supervisord_server:server0', 'supervisord_process:mysql'],
                 'check': 'supervisord.process.check'
             }]
         }
@@ -183,7 +183,7 @@ instances:
     ### Integration Test #####################################################
 
     def test_check(self):
-        """Integration test to test supervisord check."""
+        """Integration test for supervisord check."""
         for tc in self.TEST_CASES:
             check, instances = get_check('supervisord', tc['yaml'])
             ok_(check is not None, msg=check)
@@ -195,7 +195,7 @@ instances:
                     # Run the check
                     check.check(instance)
                 except Exception, e:
-                    if tc['error_message']:  # excepted error
+                    if 'error_message' in tc:  # excepted error
                         eq_(str(e), tc['error_message'])
                     else:
                         ok_(False, msg=str(e))

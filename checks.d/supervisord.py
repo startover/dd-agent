@@ -33,6 +33,10 @@ PROCESS_STATUS = {
     UNKNOWN: 'unknown'
 }
 
+SERVER_TAG = 'supervisord_server'
+
+PROCESS_TAG = 'supervisord_process'
+
 FORMAT_TIME = lambda x: time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(x))
 
 
@@ -72,7 +76,7 @@ class SupervisordCheck(AgentCheck):
                 message = 'Supervisord server %s is down.' % server_name
                 self.service_check('supervisord.server.check', CRITICAL,
                                    tags=['supervisord',
-                                         'server:%s' % server_name],
+                                         '%s:%s' % (SERVER_TAG, server_name)],
                                    message=message)
             raise Exception('Cannot connect to http://%s:%s.\n'
                             'Make sure supervisor is running and XML-RPC '
@@ -90,8 +94,8 @@ class SupervisordCheck(AgentCheck):
         for proc in processes:
             proc_name = proc['name']
             tags = ['supervisord',
-                    'server:%s' % server_name,
-                    'process:%s' % proc_name]
+                    '%s:%s' % (SERVER_TAG, server_name),
+                    '%s:%s' % (PROCESS_TAG, proc_name)]
 
             # Report Service Check
             status = DD_STATUS[proc['statename']]
@@ -104,7 +108,7 @@ class SupervisordCheck(AgentCheck):
             self.gauge('supervisord.process.uptime', uptime, tags=tags)
 
         # Report counts by status
-        tags = ['supervisord', 'server:%s' % server_name]
+        tags = ['supervisord', '%s:%s' % (SERVER_TAG, server_name)]
         for status in PROCESS_STATUS:
             self.gauge('supervisord.process.count', count_by_status[status],
                        tags=tags + ['status:%s' % PROCESS_STATUS[status]])
