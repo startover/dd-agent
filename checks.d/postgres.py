@@ -183,7 +183,7 @@ WITH max_con AS (SELECT setting::float FROM pg_settings WHERE name = 'max_connec
 SELECT %s
   FROM pg_stat_database, max_con
 """
-    }        
+    }
 
     def __init__(self, name, init_config, agentConfig):
         AgentCheck.__init__(self, name, init_config, agentConfig)
@@ -228,6 +228,13 @@ SELECT %s
                 self.instance_metrics[key] = dict(self.COMMON_METRICS)
             metrics = self.instance_metrics.get(key)
         return metrics
+
+
+    def _collect_metadata(self, key, db):
+        metadata_dict = {}
+        metadata_dict['version'] = self._get_version(key, db)
+        self.svc_metadata(metadata_dict)
+
 
     def _collect_stats(self, key, db, instance_tags, relations):
         """Query pg_stat_* for various metrics
@@ -398,10 +405,14 @@ SELECT %s
             db = self.get_connection(key, host, port, user, password, dbname)
             version = self._get_version(key, db)
             self.log.debug("Running check against version %s" % version)
+            # Metadata collection
+            self._collect_metadata(key, db)
             self._collect_stats(key, db, tags, relations)
         except ShouldRestartException:
             self.log.info("Resetting the connection")
             db = self.get_connection(key, host, port, user, password, dbname, use_cached=False)
+            # Metadata collection
+            self._collect_metadata(key, db)
             self._collect_stats(key, db, tags, relations)
 
         if db is not None:
