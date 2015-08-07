@@ -33,3 +33,4 @@ embedded/*
 .pip-cache/*
 .cache
 dump.rdb
+.idea
