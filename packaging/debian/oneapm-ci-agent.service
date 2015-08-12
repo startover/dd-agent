@@ -1,0 +1,11 @@
+[Unit]
+Description="OneAPM Agent"
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/opt/oneapm-ci-agent/bin/start_agent.sh
+ExecStop=/opt/oneapm-ci-agent/bin/supervisorctl -c /etc/oneapm-ci-agent/supervisor.conf shutdown
+
+[Install]
+WantedBy=multi-user.target

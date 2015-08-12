@@ -146,11 +146,11 @@ class TestCore(unittest.TestCase):
 
     def test_collector(self):
         agentConfig = {
-            'api_key': 'test_apikey',
+            'license_key': 'test_licensekey',
             'check_timings': True,
             'collect_ec2_tags': True,
             'collect_instance_metadata': False,
-            'create_dd_check_tags': False,
+            'create_ci_check_tags': False,
             'version': 'test',
             'tags': '',
         }
@@ -171,7 +171,7 @@ class TestCore(unittest.TestCase):
 
         # Check that we got a timing metric for all checks.
         timing_metrics = [m for m in metrics
-            if m[0] == 'datadog.agent.check_run_time']
+            if m[0] == 'oneapm.agent.check_run_time']
         all_tags = []
         for metric in timing_metrics:
             all_tags.extend(metric[3]['tags'])
@@ -184,10 +184,10 @@ class TestCore(unittest.TestCase):
         Tests that the app tags are sent if specified so
         '''
         agentConfig = {
-            'api_key': 'test_apikey',
+            'license_key': 'test_licensekey',
             'collect_ec2_tags': False,
             'collect_instance_metadata': False,
-            'create_dd_check_tags': True,
+            'create_ci_check_tags': True,
             'version': 'test',
             'tags': '',
         }
@@ -205,8 +205,8 @@ class TestCore(unittest.TestCase):
             'init_failed_checks': {}
         })
 
-        # We check that the redis DD_CHECK_TAG is sent in the payload
-        self.assertTrue('dd_check:redisdb' in payload['host-tags']['system'])
+        # We check that the redis CI_CHECK_TAG is sent in the payload
+        self.assertTrue('ci_check:redisdb' in payload['host-tags']['system'])
 
     def test_no_proxy(self):
         """ Starting with Agent 5.0.0, there should always be a local forwarder
@@ -276,7 +276,7 @@ class TestCore(unittest.TestCase):
 
         agentConfig = {
             'version': '0.1',
-            'api_key': 'toto'
+            'license_key': 'toto'
         }
 
         # default min collection interval for that check was 20sec
@@ -346,7 +346,7 @@ class TestCore(unittest.TestCase):
 
         agentConfig = {
             'version': '0.1',
-            'api_key': 'toto'
+            'license_key': 'toto'
         }
 
         # default min collection interval for that check was 20sec
@@ -364,7 +364,7 @@ class TestCore(unittest.TestCase):
 
         agentConfig = {
             'version': '0.1',
-            'api_key': 'toto'
+            'license_key': 'toto'
         }
 
         # default min collection interval for that check was 20sec
@@ -376,7 +376,7 @@ class TestCore(unittest.TestCase):
 
         ntp_args = get_ntp_args()
 
-        self.assertTrue(ntp_args["host"].endswith("datadog.pool.ntp.org"))
+        self.assertTrue(ntp_args["host"].endswith("oneapm.agent.pool.ntp.org"))
         self.assertEqual(ntp_args["port"], "ntp")
         self.assertEqual(ntp_args["version"], 3)
         self.assertEqual(ntp_args["timeout"], 1.0)

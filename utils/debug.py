@@ -4,7 +4,7 @@ import os
 from pprint import pprint
 import sys
 
-# datadog
+# oneapm-ci-agent
 from config import get_checksd_path, get_confd_path
 from util import get_os
 
@@ -56,7 +56,7 @@ def get_check(name, config_str):
 
     agentConfig = {
         'version': '0.1',
-        'api_key': 'tota'
+        'license_key': 'tota'
     }
 
     return check_class.from_yaml(yaml_text=config_str, check_name=name,

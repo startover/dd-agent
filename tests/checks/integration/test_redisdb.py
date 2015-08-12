@@ -33,7 +33,7 @@ class TestRedis(AgentCheckTest):
         instance = {
             'host': 'localhost',
             'port': AUTH_PORT,
-            'password': 'datadog-is-devops-best-friend'
+            'password': 'oneapm-ci-agent-is-devops-best-friend'
         }
         r.check(instance)
         metrics = self._sort_metrics(r.get_metrics())
@@ -78,7 +78,7 @@ class TestRedis(AgentCheckTest):
             'port': port
         }
 
-        db = redis.Redis(port=port, db=14)  # Datadog's test db
+        db = redis.Redis(port=port, db=14)  # OneAPM's test db
         db.flushdb()
         db.set("key1", "value")
         db.set("key2", "value")
@@ -212,7 +212,7 @@ class TestRedis(AgentCheckTest):
         slave_instance = {
             'host': 'localhost',
             'port': AUTH_PORT,
-            'password': 'datadog-is-devops-best-friend'
+            'password': 'oneapm-ci-agent-is-devops-best-friend'
         }
 
         repl_metrics = [
@@ -246,7 +246,7 @@ class TestRedis(AgentCheckTest):
             'port': port
         }
 
-        db = redis.Redis(port=port, db=14)  # Datadog's test db
+        db = redis.Redis(port=port, db=14)  # OneAPM's test db
 
         # Tweaking Redis's config to have the test run faster
         old_sl_thresh = db.config_get('slowlog-log-slower-than')['slowlog-log-slower-than']
@@ -279,7 +279,7 @@ class TestRedis(AgentCheckTest):
             'slowlog-max-len': 1
         }
 
-        db = redis.Redis(port=port, db=14)  # Datadog's test db
+        db = redis.Redis(port=port, db=14)  # OneAPM's test db
 
         # Tweaking Redis's config to have the test run faster
         old_sl_thresh = db.config_get('slowlog-log-slower-than')['slowlog-log-slower-than']

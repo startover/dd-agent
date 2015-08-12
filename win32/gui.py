@@ -3,7 +3,7 @@
 # Copyright © 2009-2010 CEA
 # Pierre Raybaut
 # Licensed under the terms of the CECILL License
-# Modified for Datadog
+# Modified for OneAPM
 
 # stdlib
 import logging
@@ -64,7 +64,7 @@ from spyderlib.widgets.sourcecode.codeeditor import CodeEditor
 import tornado.template as template
 import yaml
 
-# Datadog
+# OneAPM
 from checks.check_status import (
     CollectorStatus,
     DogstatsdStatus,
@@ -132,9 +132,9 @@ EXCLUDED_MAC_CHECKS = [
     'wmi_check',
 ]
 
-MAIN_WINDOW_TITLE = "Datadog Agent Manager"
+MAIN_WINDOW_TITLE = "OneAPM Agent Manager"
 
-DATADOG_SERVICE = "DatadogAgent"
+ONEAPM_SERVICE = "OneAPMAgent"
 
 HUMAN_SERVICE_STATUS = {
     AGENT_RUNNING: 'Agent is running',
@@ -194,30 +194,30 @@ class EditorFile(object):
             raise
 
 
-class DatadogConf(EditorFile):
+class OneAPMConf(EditorFile):
     def __init__(self, config_path):
-        EditorFile.__init__(self, config_path, "Agent settings file: datadog.conf")
+        EditorFile.__init__(self, config_path, "Agent settings file: oneapm-ci-agent.conf")
 
     @property
-    def api_key(self):
+    def license_key(self):
         config = get_config(parse_args=False, cfg_path=self.file_path)
-        api_key = config.get('api_key', None)
-        if not api_key or api_key == 'APIKEYHERE':
+        license_key = config.get('license_key', None)
+        if not license_key or license_key == 'LICENSEKEYHERE':
             return None
-        return api_key
+        return license_key
 
-    def check_api_key(self, editor):
-        if self.api_key is None:
-            api_key, ok = QInputDialog.getText(
+    def check_license_key(self, editor):
+        if self.license_key is None:
+            license_key, ok = QInputDialog.getText(
                 None, "Add your API KEY",
                 "You must first set your api key in this file."
-                " You can find it here: https://app.datadoghq.com/account/settings#api"
+                " You can find it here: https://tpm.oneapm.com/"
             )
-            if ok and api_key:
+            if ok and license_key:
                 new_content = []
                 for line in self.content.splitlines():
-                    if "api_key:" in line:
-                        new_content.append("api_key: %s" % str(api_key))
+                    if "license_key:" in line:
+                        new_content.append("license_key: %s" % str(license_key))
                     else:
                         new_content.append("%s" % line)
                 new_content = "\n".join(new_content)
@@ -229,11 +229,11 @@ class DatadogConf(EditorFile):
                 else:
                     agent_manager("start")
             elif not ok:
-                warning_popup("The agent needs an API key to send metrics to Datadog")
+                warning_popup("The agent needs an API key to send metrics to OneAPM")
                 if agent_status() != AGENT_STOPPED:
                     agent_manager("stop")
             else:
-                self.check_api_key(editor)
+                self.check_license_key(editor)
 
 
 class AgentCheck(EditorFile):
@@ -349,16 +349,16 @@ class PropertiesWidget(QWidget):
             self.disable_button.setEnabled(False)
             self.enable_button.setEnabled(True)
 
-    def set_datadog_conf(self, datadog_conf):
+    def set_oneapm_agent_conf(self, oneapm_agent_conf):
         self.save_button.setEnabled(True)
         self.refresh_button.setEnabled(False)
-        self.current_file = datadog_conf
-        self.desc_label.setText(datadog_conf.get_description())
-        self.editor.set_text_from_file(datadog_conf.file_path)
-        datadog_conf.content = self.editor.toPlainText().__str__()
+        self.current_file = oneapm_agent_conf
+        self.desc_label.setText(oneapm_agent_conf.get_description())
+        self.editor.set_text_from_file(oneapm_agent_conf.file_path)
+        oneapm_agent_conf.content = self.editor.toPlainText().__str__()
         self.disable_button.setEnabled(False)
         self.enable_button.setEnabled(False)
-        datadog_conf.check_api_key(self.editor)
+        oneapm_agent_conf.check_license_key(self.editor)
 
     def set_log_file(self, log_file):
         self.save_button.setEnabled(False)
@@ -420,7 +420,7 @@ class MainWindow(QSplitter):
         self.connect(self.sysTray, SIGNAL("activated(QSystemTrayIcon::ActivationReason)"), self.__icon_activated)
 
         checks = get_checks()
-        datadog_conf = DatadogConf(get_config_path())
+        oneapm_agent_conf = OneAPMConf(get_config_path())
         self.create_logs_files_windows(log_conf, prefix_conf)
 
         listwidget = QListWidget(self)
@@ -449,7 +449,7 @@ class MainWindow(QSplitter):
         self.agent_settings = QPushButton(get_icon("edit.png"),
                                           "Settings", self)
         self.connect(self.agent_settings, SIGNAL("clicked()"),
-                     lambda: [self.properties.set_datadog_conf(datadog_conf),
+                     lambda: [self.properties.set_oneapm_agent_conf(oneapm_agent_conf),
                      self.show_html(self.properties.group_code, self.properties.html_window, False)])
 
         self.setting_menu = SettingMenu(self.settings)
@@ -493,7 +493,7 @@ class MainWindow(QSplitter):
         self.setSizes([150, 1])
         self.setStretchFactor(1, 1)
         self.resize(QSize(950, 600))
-        self.properties.set_datadog_conf(datadog_conf)
+        self.properties.set_oneapm_agent_conf(oneapm_agent_conf)
 
         self.do_refresh()
 
@@ -546,7 +546,7 @@ class MainWindow(QSplitter):
 
 
 class Menu(QMenu):
-    ABOUT = "Datadog Agent v{0}"
+    ABOUT = "OneAPM Agent v{0}"
     START = "Start"
     STOP = "Stop"
     RESTART = "Restart"
@@ -590,8 +590,8 @@ class Menu(QMenu):
     def enable_or_disable_mac(self):
         try:
             output = check_output(['osascript', '-e',
-                                   self.SYSTEM_EVENTS_CMD.format('get the path of every login item whose name is "Datadog Agent"')])
-            return 'Disable' if 'Datadog' in output else 'Enable'
+                                   self.SYSTEM_EVENTS_CMD.format('get the path of every login item whose name is "OneAPM Agent"')])
+            return 'Disable' if 'OneAPM' in output else 'Enable'
         except CalledProcessError, e:
             log.warning('Get login item failed with output:{0}'.format(e.output))
             return 'Disable'
@@ -599,9 +599,9 @@ class Menu(QMenu):
     def enable_or_disable_login(self):
         previous = self.enable_or_disable_mac()
         if previous == 'Disable':
-            command = 'delete every login item whose name is "Datadog Agent"'
+            command = 'delete every login item whose name is "OneAPM Agent"'
         else:
-            command = 'make login item at end with properties {path:"/Applications/Datadog Agent.app", name:"Datadog Agent", hidden:false}'
+            command = 'make login item at end with properties {path:"/Applications/OneAPM Agent.app", name:"OneAPM Agent", hidden:false}'
         try:
             check_call(['osascript', '-e', self.SYSTEM_EVENTS_CMD.format(command)])
             self.removeAction(self.options[self.MAC_LOGIN.format(previous)])
@@ -695,11 +695,11 @@ def check_yaml_syntax(content):
 def service_manager(action):
     try:
         if action == 'stop':
-            win32serviceutil.StopService(DATADOG_SERVICE)
+            win32serviceutil.StopService(ONEAPM_SERVICE)
         elif action == 'start':
-            win32serviceutil.StartService(DATADOG_SERVICE)
+            win32serviceutil.StartService(ONEAPM_SERVICE)
         elif action == 'restart':
-            win32serviceutil.RestartService(DATADOG_SERVICE)
+            win32serviceutil.RestartService(ONEAPM_SERVICE)
     except Exception, e:
         warning_popup("Couldn't %s service: \n %s" % (action, str(e)))
 
@@ -707,7 +707,7 @@ def service_manager(action):
 def service_manager_status():
     try:
         return WIN_STATUS_TO_AGENT[
-            win32serviceutil.QueryServiceStatus(DATADOG_SERVICE)[1]
+            win32serviceutil.QueryServiceStatus(ONEAPM_SERVICE)[1]
         ]
     except Exception:
         return AGENT_UNKNOWN
@@ -715,14 +715,14 @@ def service_manager_status():
 
 def osx_manager(action):
     try:
-        check_call(['datadog-agent', action])
+        check_call(['oneapm-ci-agent', action])
     except Exception, e:
-        warning_popup("Couldn't execute datadog-agent %s: \n %s" % (action, str(e)))
+        warning_popup("Couldn't execute oneapm-ci-agent %s: \n %s" % (action, str(e)))
 
 
 def osx_manager_status():
     try:
-        check_output(['datadog-agent', 'status'])
+        check_output(['oneapm-ci-agent', 'status'])
         return AGENT_RUNNING
     except CalledProcessError, e:
         if 'not running' in e.output:
@@ -757,7 +757,7 @@ def windows_flare():
     case_id, ok = QInputDialog.getInteger(
         None, "Flare",
         "Your logs and configuration files are going to be collected and "
-        "sent to Datadog Support. Please enter your ticket number if you have one:",
+        "sent to OneAPM Support. Please enter your ticket number if you have one:",
         value=0, min=0
     )
     if not ok:
@@ -796,9 +796,9 @@ if __name__ == '__main__':
     app = QApplication([])
     if Platform.is_mac():
         add_image_path(osp.join(os.getcwd(), 'images'))
-        # add datadog-agent in PATH
+        # add oneapm-ci-agent in PATH
         os.environ['PATH'] = "{0}:{1}".format(
-            '/opt/datadog-agent/bin/',
+            '/opt/oneapm-ci-agent/bin/',
             os.environ['PATH']
         )
         win = SystemTray() if len(sys.argv) < 2 else MainWindow()

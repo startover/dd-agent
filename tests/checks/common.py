@@ -117,7 +117,7 @@ class Fixtures(object):
 class AgentCheckTest(unittest.TestCase):
     DEFAULT_AGENT_CONFIG = {
         'version': '0.1',
-        'api_key': 'toto'
+        'license_key': 'toto'
     }
 
     def __init__(self, *args, **kwargs):

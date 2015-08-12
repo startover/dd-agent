@@ -1,14 +1,4 @@
-#!/opt/datadog-agent/embedded/bin/python
-'''
-    Datadog
-    www.datadoghq.com
-    ----
-    Make sense of your IT Data
-
-    Licensed under Simplified BSD License (see LICENSE)
-    (C) Boxed Ice 2010 all rights reserved
-    (C) Datadog, Inc. 2010-2013 all rights reserved
-'''
+#!/opt/oneapm-ci-agent/embedded/bin/python
 # set up logging before importing any other components
 from config import initialize_logging  # noqa
 initialize_logging('forwarder')
@@ -60,9 +50,9 @@ from util import (
 log = logging.getLogger('forwarder')
 log.setLevel(get_logging_config()['log_level'] or logging.INFO)
 
-DD_ENDPOINT = "dd_url"
+CI_ENDPOINT = "ci_url"
 
-TRANSACTION_FLUSH_INTERVAL = 5000  # Every 5 seconds
+TRANSACTION_FLUSH_INTERVAL = 60000  # Every 60 seconds
 WATCHDOG_INTERVAL_MULTIPLIER = 10  # 10x flush interval
 HEADERS_TO_REMOVE = [
     'Host',
@@ -164,23 +154,23 @@ class AgentTransaction(Transaction):
     @classmethod
     def set_endpoints(cls):
 
-        # Only send data to Datadog if an API KEY exists
-        # i.e. user is also Datadog user
+        # Only send data to OneAPM if an API KEY exists
+        # i.e. user is also OneAPM user
         try:
-            is_dd_user = 'api_key' in cls._application._agentConfig\
+            is_ci_user = 'license_key' in cls._application._agentConfig\
                 and 'use_dd' in cls._application._agentConfig\
                 and cls._application._agentConfig['use_dd']\
-                and cls._application._agentConfig.get('api_key')
-            if is_dd_user:
-                log.warn("You are a Datadog user so we will send data to https://app.datadoghq.com")
-                cls._endpoints.append(DD_ENDPOINT)
+                and cls._application._agentConfig.get('license_key')
+            if is_ci_user:
+                log.warn("You are a OneAPM user so we will send data to https://tpm.oneapm.com")
+                cls._endpoints.append(CI_ENDPOINT)
         except Exception:
-            log.info("Not a Datadog user")
+            log.info("Not a OneAPM user")
 
     def __init__(self, data, headers, msg_type=""):
         self._data = data
         self._headers = headers
-        self._headers['DD-Forwarder-Version'] = get_version()
+        self._headers['CI-Forwarder-Version'] = get_version()
         self._msg_type = msg_type
 
         # Call after data has been set (size is computed in Transaction's init)
@@ -200,10 +190,10 @@ class AgentTransaction(Transaction):
 
     def get_url(self, endpoint):
         endpoint_base_url = get_url_endpoint(self._application._agentConfig[endpoint])
-        api_key = self._application._agentConfig.get('api_key')
-        if api_key:
-            return "{0}/intake/{1}?api_key={2}".format(endpoint_base_url, self._msg_type, api_key)
-        return "{0}/intake/{1}".format(endpoint_base_url, self._msg_type)
+        license_key = self._application._agentConfig.get('license_key')
+        if license_key:
+            return "{0}/infrastructure/metrics.do?license_key={1}".format(endpoint_base_url, license_key)
+        return "{0}/infrastructure/metrics.do".format(endpoint_base_url)
 
     def flush(self):
         for endpoint in self._endpoints:
@@ -253,7 +243,7 @@ class AgentTransaction(Transaction):
 
             if use_curl:
                 if pycurl is None:
-                    log.error("dd-agent is configured to use the Curl HTTP Client, but pycurl is not available on this system.")
+                    log.error("oneapm-ci-agent is configured to use the Curl HTTP Client, but pycurl is not available on this system.")
                 else:
                     log.debug("Using CurlAsyncHTTPClient")
                     tornado.httpclient.AsyncHTTPClient.configure("tornado.curl_httpclient.CurlAsyncHTTPClient")
@@ -281,8 +271,8 @@ class APIMetricTransaction(MetricTransaction):
     def get_url(self, endpoint):
         endpoint_base_url = get_url_endpoint(self._application._agentConfig[endpoint])
         config = self._application._agentConfig
-        api_key = config['api_key']
-        url = endpoint_base_url + '/api/v1/series/?api_key=' + api_key
+        license_key = config['license_key']
+        url = endpoint_base_url + '/api/v1/series/?license_key=' + license_key
         return url
 
     def get_data(self):
@@ -295,8 +285,8 @@ class APIServiceCheckTransaction(AgentTransaction):
     def get_url(self, endpoint):
         endpoint_base_url = get_url_endpoint(self._application._agentConfig[endpoint])
         config = self._application._agentConfig
-        api_key = config['api_key']
-        url = endpoint_base_url + '/api/v1/check_run/?api_key=' + api_key
+        license_key = config['license_key']
+        url = endpoint_base_url + '/api/v1/check_run/?license_key=' + license_key
         return url
 
 
@@ -437,7 +427,7 @@ class Application(tornado.web.Application):
         if len(self._metrics) > 0:
             self._metrics['uuid'] = get_uuid()
             self._metrics['internalHostname'] = get_hostname(self._agentConfig)
-            self._metrics['apiKey'] = self._agentConfig['api_key']
+            self._metrics['licenseKey'] = self._agentConfig['license_key']
             MetricTransaction(json.dumps(self._metrics),
                               headers={'Content-Type': 'application/json'})
             self._metrics = {}
@@ -550,9 +540,6 @@ def init(skip_ssl_validation=False, use_simple_http_client=False):
 
 
 def main():
-    # Deprecation notice
-    from utils.deprecations import deprecate_old_command_line_tools
-    deprecate_old_command_line_tools()
 
     define("sslcheck", default=1, help="Verify SSL hostname, on by default")
     define("use_simple_http_client", default=0, help="Use Tornado SimpleHTTPClient instead of CurlAsyncHTTPClient")

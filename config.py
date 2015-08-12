@@ -27,10 +27,10 @@ from utils.proxy import get_proxy
 from utils.subprocess_output import subprocess
 
 # CONSTANTS
-AGENT_VERSION = "5.5.0"
-DATADOG_CONF = "datadog.conf"
-UNIX_CONFIG_PATH = '/etc/dd-agent'
-MAC_CONFIG_PATH = '/opt/datadog-agent/etc'
+AGENT_VERSION = "1.0.0"
+ONEAPM_CONF = "oneapm-ci-agent.conf"
+UNIX_CONFIG_PATH = '/etc/oneapm-ci-agent'
+MAC_CONFIG_PATH = '/opt/oneapm-ci-agent/etc'
 DEFAULT_CHECK_FREQUENCY = 15   # seconds
 LOGGING_MAX_BYTES = 5 * 1024 * 1024
 
@@ -58,9 +58,8 @@ NAGIOS_OLD_CONF_KEYS = [
     'nagios_perf_cfg'
 ]
 
-LEGACY_DATADOG_URLS = [
-    "app.datadoghq.com",
-    "app.datad0g.com",
+LEGACY_ONEAPM_URLS = [
+    "tpm.oneapm.com",
 ]
 
 
@@ -72,8 +71,8 @@ def get_parsed_args():
     parser = OptionParser()
     parser.add_option('-A', '--autorestart', action='store_true', default=False,
                       dest='autorestart')
-    parser.add_option('-d', '--dd_url', action='store', default=None,
-                      dest='dd_url')
+    parser.add_option('-d', '--ci_url', action='store', default=None,
+                      dest='ci_url')
     parser.add_option('-u', '--use-local-forwarder', action='store_true',
                       default=False, dest='use_forwarder')
     parser.add_option('-n', '--disable-dd', action='store_true', default=False,
@@ -89,7 +88,7 @@ def get_parsed_args():
     except SystemExit:
         # Ignore parse errors
         options, args = Values({'autorestart': False,
-                                'dd_url': None,
+                                'ci_url': None,
                                 'disable_dd':False,
                                 'use_forwarder': False,
                                 'profile': False}), []
@@ -103,12 +102,11 @@ def get_version():
 # Return url endpoint, here because needs access to version number
 def get_url_endpoint(default_url, endpoint_type='app'):
     parsed_url = urlparse(default_url)
-    if parsed_url.netloc not in LEGACY_DATADOG_URLS:
+    if parsed_url.netloc not in LEGACY_ONEAPM_URLS:
         return default_url
 
     subdomain = parsed_url.netloc.split(".")[0]
 
-    # Replace https://app.datadoghq.com in https://5-2-0-app.agent.datadoghq.com
     return default_url.replace(subdomain,
         "{0}-{1}.agent".format(
             get_version().replace(".", "-"),
@@ -142,12 +140,12 @@ def _windows_commondata_path():
 
 def _windows_config_path():
     common_data = _windows_commondata_path()
-    return _config_path(os.path.join(common_data, 'Datadog'))
+    return _config_path(os.path.join(common_data, 'OneAPM'))
 
 
 def _windows_confd_path():
     common_data = _windows_commondata_path()
-    return _confd_path(os.path.join(common_data, 'Datadog'))
+    return _confd_path(os.path.join(common_data, 'OneAPM'))
 
 
 def _windows_checksd_path():
@@ -188,7 +186,7 @@ def _unix_checksd_path():
 
 
 def _config_path(directory):
-    path = os.path.join(directory, DATADOG_CONF)
+    path = os.path.join(directory, ONEAPM_CONF)
     if os.path.exists(path):
         return path
     raise PathNotFound(path)
@@ -323,14 +321,14 @@ def get_config(parse_args=True, cfg_path=None, options=None):
         'use_ec2_instance_id': False,  # DEPRECATED
         'version': get_version(),
         'watchdog': True,
-        'additional_checksd': '/etc/dd-agent/checks.d/',
+        'additional_checksd': '/etc/oneapm-ci-agent/checks.d/',
         'bind_host': get_default_bind_host(),
         'statsd_metric_namespace': None,
         'utf8_decoding': False
     }
 
     if Platform.is_mac():
-        agentConfig['additional_checksd'] = '/opt/datadog-agent/etc/checks.d'
+        agentConfig['additional_checksd'] = '/opt/oneapm-ci-agent/etc/checks.d'
 
     # Config handling
     try:
@@ -371,14 +369,14 @@ def get_config(parse_args=True, cfg_path=None, options=None):
             listen_port = 17123
             if config.has_option('Main', 'listen_port'):
                 listen_port = int(config.get('Main', 'listen_port'))
-            agentConfig['dd_url'] = "http://" + agentConfig['bind_host'] + ":" + str(listen_port)
+            agentConfig['ci_url'] = "http://" + agentConfig['bind_host'] + ":" + str(listen_port)
             agentConfig['use_forwarder'] = True
-        elif options is not None and not options.disable_dd and options.dd_url:
-            agentConfig['dd_url'] = options.dd_url
+        elif options is not None and not options.disable_dd and options.ci_url:
+            agentConfig['ci_url'] = options.ci_url
         else:
-            agentConfig['dd_url'] = config.get('Main', 'dd_url')
-        if agentConfig['dd_url'].endswith('/'):
-            agentConfig['dd_url'] = agentConfig['dd_url'][:-1]
+            agentConfig['ci_url'] = config.get('Main', 'ci_url')
+        if agentConfig['ci_url'].endswith('/'):
+            agentConfig['ci_url'] = agentConfig['ci_url'][:-1]
 
         # Extra checks.d path
         # the linux directory is set by default
@@ -387,7 +385,7 @@ def get_config(parse_args=True, cfg_path=None, options=None):
         elif get_os() == 'windows':
             # default windows location
             common_path = _windows_commondata_path()
-            agentConfig['additional_checksd'] = os.path.join(common_path, 'Datadog', 'checks.d')
+            agentConfig['additional_checksd'] = os.path.join(common_path, 'OneAPM', 'checks.d')
 
         if config.has_option('Main', 'use_dogstatsd'):
             agentConfig['use_dogstatsd'] = config.get('Main', 'use_dogstatsd').lower() in ("yes", "true")
@@ -401,11 +399,11 @@ def get_config(parse_args=True, cfg_path=None, options=None):
             agentConfig['use_web_info_page'] = True
 
         if not agentConfig['use_dd']:
-            sys.stderr.write("Please specify at least one endpoint to send metrics to. This can be done in datadog.conf.")
+            sys.stderr.write("Please specify at least one endpoint to send metrics to. This can be done in oneapm-ci-agent.conf.")
             exit(2)
 
         # Which API key to use
-        agentConfig['api_key'] = config.get('Main', 'api_key')
+        agentConfig['license_key'] = config.get('Main', 'license_key')
 
         # local traffic only? Default to no
         agentConfig['non_local_traffic'] = False
@@ -455,8 +453,8 @@ def get_config(parse_args=True, cfg_path=None, options=None):
                 agentConfig[key] = value
 
         # Create app:xxx tags based on monitored apps
-        agentConfig['create_dd_check_tags'] = config.has_option('Main', 'create_dd_check_tags') and \
-            _is_affirmative(config.get('Main', 'create_dd_check_tags'))
+        agentConfig['create_ci_check_tags'] = config.has_option('Main', 'create_ci_check_tags') and \
+            _is_affirmative(config.get('Main', 'create_ci_check_tags'))
 
         # Forwarding to external statsd server
         if config.has_option('Main', 'statsd_forward_host'):
@@ -467,7 +465,7 @@ def get_config(parse_args=True, cfg_path=None, options=None):
         # optionally send dogstatsd data directly to the agent.
         if config.has_option('Main', 'dogstatsd_use_ddurl'):
             if _is_affirmative(config.get('Main', 'dogstatsd_use_ddurl')):
-                agentConfig['dogstatsd_target'] = agentConfig['dd_url']
+                agentConfig['dogstatsd_target'] = agentConfig['ci_url']
 
         # Optional config
         # FIXME not the prettiest code ever...
@@ -491,8 +489,8 @@ def get_config(parse_args=True, cfg_path=None, options=None):
         except ConfigParser.NoOptionError:
             pass
 
-        if config.has_option('datadog', 'ddforwarder_log'):
-            agentConfig['has_datadog'] = True
+        if config.has_option('oneapm_agent', 'ddforwarder_log'):
+            agentConfig['has_oneapm_agent'] = True
 
         # Dogstream config
         if config.has_option("Main", "dogstream_log"):
@@ -563,7 +561,7 @@ def get_config(parse_args=True, cfg_path=None, options=None):
     # Storing proxy settings in the agentConfig
     agentConfig['proxy_settings'] = get_proxy(agentConfig)
     if agentConfig.get('ca_certs', None) is None:
-        agentConfig['ssl_certificate'] = get_ssl_certificate(get_os(), 'datadog-cert.pem')
+        agentConfig['ssl_certificate'] = get_ssl_certificate(get_os(), 'oneapm-cert.pem')
     else:
         agentConfig['ssl_certificate'] = agentConfig['ca_certs']
 
@@ -622,7 +620,7 @@ def set_win32_cert_path():
         crt_path = os.path.join(prog_path, 'ca-certificates.crt')
     else:
         cur_path = os.path.dirname(__file__)
-        crt_path = os.path.join(cur_path, 'packaging', 'datadog-agent', 'win32',
+        crt_path = os.path.join(cur_path, 'packaging', 'oneapm-ci-agent', 'win32',
                 'install_files', 'ca-certificates.crt')
     import tornado.simple_httpclient
     log.info("Windows certificate path: %s" % crt_path)
@@ -746,7 +744,7 @@ def load_check_directory(agentConfig, hostname):
 
     deprecated_configs_enabled = [v for k,v in OLD_STYLE_PARAMETERS if len([l for l in agentConfig if l.startswith(k)]) > 0]
     for deprecated_config in deprecated_configs_enabled:
-        msg = "Configuring %s in datadog.conf is not supported anymore. Please use conf.d" % deprecated_config
+        msg = "Configuring %s in oneapm-ci-agent.conf is not supported anymore. Please use conf.d" % deprecated_config
         deprecated_checks[deprecated_config] = {'error': msg, 'traceback': None}
         log.error(msg)
 
@@ -804,11 +802,11 @@ def load_check_directory(agentConfig, hostname):
                 continue
         else:
             # Compatibility code for the Nagios checks if it's still configured
-            # in datadog.conf
+            # in oneapm-ci-agent.conf
             # FIXME: 6.x, should be removed
             if check_name == 'nagios':
                 if any([nagios_key in agentConfig for nagios_key in NAGIOS_OLD_CONF_KEYS]):
-                    log.warning("Configuring Nagios in datadog.conf is deprecated "
+                    log.warning("Configuring Nagios in oneapm-ci-agent.conf is deprecated "
                                 "and will be removed in a future version. "
                                 "Please use conf.d")
                     check_config = {'instances':[dict((key, agentConfig[key]) for key in agentConfig if key in NAGIOS_OLD_CONF_KEYS)]}
@@ -920,15 +918,15 @@ def get_logging_config(cfg_path=None):
         'syslog_port': None,
     }
     if system_os == 'windows':
-        logging_config['windows_collector_log_file'] = os.path.join(_windows_commondata_path(), 'Datadog', 'logs', 'collector.log')
-        logging_config['windows_forwarder_log_file'] = os.path.join(_windows_commondata_path(), 'Datadog', 'logs', 'forwarder.log')
-        logging_config['windows_dogstatsd_log_file'] = os.path.join(_windows_commondata_path(), 'Datadog', 'logs', 'dogstatsd.log')
-        logging_config['jmxfetch_log_file'] = os.path.join(_windows_commondata_path(), 'Datadog', 'logs', 'jmxfetch.log')
+        logging_config['windows_collector_log_file'] = os.path.join(_windows_commondata_path(), 'OneAPM', 'logs', 'collector.log')
+        logging_config['windows_forwarder_log_file'] = os.path.join(_windows_commondata_path(), 'OneAPM', 'logs', 'forwarder.log')
+        logging_config['windows_dogstatsd_log_file'] = os.path.join(_windows_commondata_path(), 'OneAPM', 'logs', 'dogstatsd.log')
+        logging_config['jmxfetch_log_file'] = os.path.join(_windows_commondata_path(), 'OneAPM', 'logs', 'jmxfetch.log')
     else:
-        logging_config['collector_log_file'] = '/var/log/datadog/collector.log'
-        logging_config['forwarder_log_file'] = '/var/log/datadog/forwarder.log'
-        logging_config['dogstatsd_log_file'] = '/var/log/datadog/dogstatsd.log'
-        logging_config['jmxfetch_log_file'] = '/var/log/datadog/jmxfetch.log'
+        logging_config['collector_log_file'] = '/var/log/oneapm-ci-agent/collector.log'
+        logging_config['forwarder_log_file'] = '/var/log/oneapm-ci-agent/forwarder.log'
+        logging_config['dogstatsd_log_file'] = '/var/log/oneapm-ci-agent/dogstatsd.log'
+        logging_config['jmxfetch_log_file'] = '/var/log/oneapm-ci-agent/jmxfetch.log'
         logging_config['log_to_syslog'] = True
 
     config_path = get_config_path(cfg_path, os_name=system_os)
@@ -936,15 +934,9 @@ def get_logging_config(cfg_path=None):
     config.readfp(skip_leading_wsp(open(config_path)))
 
     if config.has_section('handlers') or config.has_section('loggers') or config.has_section('formatters'):
-        if system_os == 'windows':
-            config_example_file = "https://github.com/DataDog/dd-agent/blob/master/packaging/datadog-agent/win32/install_files/datadog_win32.conf"
-        else:
-            config_example_file = "https://github.com/DataDog/dd-agent/blob/master/datadog.conf.example"
-
         sys.stderr.write("""Python logging config is no longer supported and will be ignored.
-            To configure logging, update the logging portion of 'datadog.conf' to match:
-             '%s'.
-             """ % config_example_file)
+            To configure logging, update the logging portion of 'oneapm-ci-agent.conf'.
+             """)
 
     for option in logging_config:
         if config.has_option('Main', option):

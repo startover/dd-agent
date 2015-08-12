@@ -164,7 +164,7 @@ class NetworkCheck(AgentCheck):
             skip_event = _is_affirmative(instance.get('skip_event', False))
             instance_name = instance['name']
             if not skip_event:
-                self.warning("Using events for service checks is deprecated in favor of monitors and will be removed in future versions of the Datadog Agent.")
+                self.warning("Using events for service checks is deprecated in favor of monitors and will be removed in future versions of the OneAPM Agent.")
                 event = None
 
                 if instance_name not in self.statuses:

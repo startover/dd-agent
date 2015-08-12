@@ -34,7 +34,7 @@ namespace :ci do
       Wait.for 'http://localhost:9200', 15
       # Create an index in ES
       http = Net::HTTP.new('localhost', 9200)
-      resp = http.send_request('PUT', '/datadog/')
+      resp = http.send_request('PUT', '/oneapm_ci_agent/')
       puts "Creating index returned #{resp.code}"
     end
 

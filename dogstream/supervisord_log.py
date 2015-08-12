@@ -1,9 +1,9 @@
 """
-Custom parser for supervisord log suitable for use by Datadog 'dogstreams'
+Custom parser for supervisord log suitable for use by OneAPM 'dogstreams'
 
-Add to datadog.conf as follows:
+Add to oneapm-ci-agent.conf as follows:
 
-dogstreams: [path_to_supervisord.log]:datadog.streams.supervisord:parse_supervisord
+dogstreams: [path_to_supervisord.log]:oneapm.agent.streams.supervisord:parse_supervisord
 
 """
 # stdlib
@@ -27,7 +27,7 @@ SUPERVISORD_LEVELS = [
 
 ]
 
-# mapping between datadog and supervisord log levels
+# mapping between OneAPM CI Agent and supervisord log levels
 ALERT_TYPES_MAPPING = {
     "CRIT": "error",
     "ERRO": "error",

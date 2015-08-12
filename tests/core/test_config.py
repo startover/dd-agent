@@ -20,8 +20,8 @@ class TestConfig(unittest.TestCase):
         """
         agentConfig = get_config(cfg_path=os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                                        'fixtures', 'badconfig.conf'))
-        self.assertEquals(agentConfig["dd_url"], "https://app.datadoghq.com")
-        self.assertEquals(agentConfig["api_key"], "1234")
+        self.assertEquals(agentConfig["ci_url"], "https://tpm.oneapm.com")
+        self.assertEquals(agentConfig["license_key"], "1234")
         self.assertEquals(agentConfig["nagios_log"], "/var/log/nagios3/nagios.log")
         self.assertEquals(agentConfig["graphite_listen_port"], 17126)
         self.assertTrue("statsd_metric_namespace" in agentConfig)
@@ -104,7 +104,7 @@ class TestConfig(unittest.TestCase):
             Platform.is_win32 = staticmethod(func)
 
     def testDefaultChecks(self):
-        checks = load_check_directory({"additional_checksd": "/etc/dd-agent/checks.d/"}, "foo")
+        checks = load_check_directory({"additional_checksd": "/etc/oneapm-ci-agent/checks.d/"}, "foo")
         init_checks_names = [c.name for c in checks['initialized_checks']]
 
         for c in DEFAULT_CHECKS:

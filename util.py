@@ -84,7 +84,7 @@ def get_os():
 def headers(agentConfig):
     # Build the request headers
     return {
-        'User-Agent': 'Datadog Agent/%s' % agentConfig['version'],
+        'User-Agent': 'OneAPM Agent/%s' % agentConfig['version'],
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'text/html, */*',
     }
@@ -169,7 +169,7 @@ def get_hostname(config=None):
 
     Tries, in order:
 
-      * agent config (datadog.conf, "hostname:")
+      * agent config (oneapm-ci-agent.conf, "hostname:")
       * 'hostname -f' (on unix)
       * socket.gethostname()
     """
@@ -223,8 +223,8 @@ def get_hostname(config=None):
             hostname = socket_hostname
 
     if hostname is None:
-        log.critical('Unable to reliably determine host name. You can define one in datadog.conf or in your hosts file')
-        raise Exception('Unable to reliably determine host name. You can define one in datadog.conf or in your hosts file')
+        log.critical('Unable to reliably determine host name. You can define one in oneapm-ci-agent.conf or in your hosts file')
+        raise Exception('Unable to reliably determine host name. You can define one in oneapm-ci-agent.conf or in your hosts file')
     else:
         return hostname
 

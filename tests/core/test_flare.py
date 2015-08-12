@@ -12,8 +12,8 @@ from utils.flare import Flare
 
 def get_mocked_config():
     return {
-        'api_key': 'APIKEY',
-        'dd_url': 'https://app.datadoghq.com',
+        'license_key': 'LICENSEKEY',
+        'ci_url': 'https://tpm.oneapm.com',
     }
 
 
@@ -55,9 +55,9 @@ class FlareTest(unittest.TestCase):
         f = Flare(case_id=1337)
         conf = mock_config()
         self.assertEqual(f._case_id, 1337)
-        self.assertEqual(f._api_key, conf['api_key'])
-        self.assertEqual(f._url, 'https://6-6-6-flare.agent.datadoghq.com/support/flare')
-        self.assertEqual(f._tar_path, os.path.join(get_mocked_temp(), "datadog-agent-1.tar.bz2"))
+        self.assertEqual(f._license_key, conf['license_key'])
+        self.assertEqual(f._url, 'http://support.oneapm.com')
+        self.assertEqual(f._tar_path, os.path.join(get_mocked_temp(), "oneapm-ci-agent-1.tar.bz2"))
 
     @mock.patch('utils.flare.requests.post', return_value=FakeResponse())
     @mock.patch('config.get_version', side_effect=get_mocked_version)
@@ -74,11 +74,11 @@ class FlareTest(unittest.TestCase):
         args, kwargs = mock_requests.call_args_list[0]
         self.assertEqual(
             args,
-            ('https://6-6-6-flare.agent.datadoghq.com/support/flare/1337?api_key=APIKEY',)
+            ('https://tpm.oneapm.com',)
         )
         self.assertEqual(
             kwargs['files']['flare_file'].name,
-            os.path.join(get_mocked_temp(), "datadog-agent-1.tar.bz2")
+            os.path.join(get_mocked_temp(), "oneapm-ci-agent-1.tar.bz2")
         )
         self.assertEqual(kwargs['data']['case_id'], 1337)
         self.assertEqual(kwargs['data']['email'], 'test@example.com')
@@ -99,11 +99,11 @@ class FlareTest(unittest.TestCase):
         args, kwargs = mock_requests.call_args_list[0]
         self.assertEqual(
             args,
-            ('https://6-6-6-flare.agent.datadoghq.com/support/flare?api_key=APIKEY',)
+            ('https://tpm.oneapm.com',)
         )
         self.assertEqual(
             kwargs['files']['flare_file'].name,
-            os.path.join(get_mocked_temp(), "datadog-agent-1.tar.bz2")
+            os.path.join(get_mocked_temp(), "oneapm-ci-agent-1.tar.bz2")
         )
         self.assertEqual(kwargs['data']['case_id'], None)
         self.assertEqual(kwargs['data']['email'], 'test@example.com')

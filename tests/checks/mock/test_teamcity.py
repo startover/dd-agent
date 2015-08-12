@@ -56,7 +56,7 @@ class TeamCityCheckTest(unittest.TestCase):
     def test_build_event(self):
         agent_config = {
             'version': '0.1',
-            'api_key': 'toto'
+            'license_key': 'toto'
         }
         check = load_check('teamcity', CONFIG, agent_config)
 

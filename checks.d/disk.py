@@ -52,10 +52,10 @@ class Disk(AgentCheck):
         self._all_partitions = _is_affirmative(
             instance.get('all_partitions', False))
 
-        # FIXME: 6.x, drop use_mount option in datadog.conf
+        # FIXME: 6.x, drop use_mount option in oneapm-ci-agent.conf
         self._load_legacy_option(instance, 'use_mount', False,
                                  operation=_is_affirmative)
-        # FIXME: 6.x, drop device_blacklist_re option in datadog.conf
+        # FIXME: 6.x, drop device_blacklist_re option in oneapm-ci-agent.conf
         self._load_legacy_option(instance, 'excluded_disk_re', '^$',
                                  legacy_name='device_blacklist_re',
                                  operation=re.compile)
@@ -67,7 +67,7 @@ class Disk(AgentCheck):
 
         if value == default and legacy_name in self.agentConfig:
             self.log.warn(
-                "Using `{0}` in datadog.conf has been deprecated"
+                "Using `{0}` in oneapm-ci-agent.conf has been deprecated"
                 " in favor of `{1}` in disk.yaml".format(legacy_name, option)
             )
             value = self.agentConfig.get(legacy_name) or default

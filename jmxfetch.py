@@ -13,7 +13,7 @@ import time
 # 3rd party
 import yaml
 
-# datadog
+# oneapm-ci-agent
 from config import (
     DEFAULT_CHECK_FREQUENCY,
     get_confd_path,
@@ -40,7 +40,7 @@ JAVA_LOGGING_LEVEL = {
 
 _JVM_DEFAULT_MAX_MEMORY_ALLOCATION = " -Xmx200m"
 _JVM_DEFAULT_INITIAL_MEMORY_ALLOCATION = " -Xms50m"
-JMXFETCH_MAIN_CLASS = "org.datadog.jmxfetch.App"
+JMXFETCH_MAIN_CLASS = "org.oneapm.jmxfetch.App"
 JMX_CHECKS = [
     'activemq',
     'activemq_58',
@@ -58,7 +58,7 @@ JMX_LIST_COMMANDS = {
     'list_limited_attributes': "List attributes that do match one of your instances configuration but that are not being collected because it would exceed the number of metrics that can be collected",
     JMX_COLLECT_COMMAND: "Start the collection of metrics based on your current configuration and display them in the console"}
 
-LINK_TO_DOC = "See http://docs.datadoghq.com/integrations/java/ for more information"
+LINK_TO_DOC = "See http://support.oneapm.com/ for more information"
 
 
 class InvalidJMXConfiguration(Exception):

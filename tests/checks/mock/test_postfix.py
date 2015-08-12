@@ -18,11 +18,11 @@ log = logging.getLogger()
 
 class TestPostfix(unittest.TestCase):
     #
-    # you can execute this dd-agent unit test via python's nose tool
+    # you can execute this oneapm-ci-agent unit test via python's nose tool
     #
     # example:
     #
-    #     nosetests --nocapture --tests=dd-agent/tests/test_postfix.py
+    #     nosetests --nocapture --tests=oneapm-ci-agent/tests/test_postfix.py
     #
     def setUp(self):
         self.queue_root = '/tmp/dd-postfix-test/var/spool/postfix'
@@ -89,14 +89,14 @@ class TestPostfix(unittest.TestCase):
         for queue, count in self.in_count.iteritems():
             print 'Test messges put into', queue, '= ', self.in_count[queue][0]
 
-        # output postfix.py dd-agent plugin counts... per queue
+        # output postfix.py oneapm-ci-agent plugin counts... per queue
         print
         for tuple in out_count:
             queue = tuple[3]['tags'][0].split(':')[1]
             self.assertEquals(int(tuple[2]), int(self.in_count[queue][0]))
-            print 'Test messages counted by dd-agent for', queue, '= ', tuple[2]
+            print 'Test messages counted by oneapm-ci-agent for', queue, '= ', tuple[2]
 
         #
-        # uncomment this to see the raw dd-agent metric output
+        # uncomment this to see the raw oneapm-ci-agent metric output
         #
         # print out_count

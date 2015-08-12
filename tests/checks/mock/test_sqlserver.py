@@ -14,10 +14,10 @@ logging.basicConfig()
 """
 Run the following on your local SQL Server:
 
-CREATE LOGIN datadog WITH PASSWORD = '340$Uuxwp7Mcxo7Khy';
-CREATE USER datadog FOR LOGIN datadog;
-GRANT SELECT on sys.dm_os_performance_counters to datadog;
-GRANT VIEW SERVER STATE to datadog;
+CREATE LOGIN oneapm-ci-agent WITH PASSWORD = '340$Uuxwp7Mcxo7Khy';
+CREATE USER oneapm-ci-agent FOR LOGIN oneapm-ci-agent;
+GRANT SELECT on sys.dm_os_performance_counters to oneapm-ci-agent;
+GRANT VIEW SERVER STATE to oneapm-ci-agent;
 """
 
 CONFIG = """
@@ -40,7 +40,7 @@ init_config:
 
 instances:
     -   host: 127.0.0.1,1433
-        username: datadog
+        username: oneapm-ci-agent
         password: 340$Uuxwp7Mcxo7Khy
 """
 

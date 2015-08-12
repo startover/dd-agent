@@ -107,7 +107,7 @@ end
 if ENV['TRAVIS'] && ENV['AWS_SECRET_ACCESS_KEY']
   cache = Cache.new(debug: ENV['DEBUG_CACHE'],
                     s3: {
-                      bucket: 'dd-agent-travis-cache',
+                      bucket: 'ci-agent-travis-cache',
                       access_key_id: ENV['AWS_ACCESS_KEY_ID'],
                       secret_access_key: ENV['AWS_SECRET_ACCESS_KEY']
                     })
@@ -145,8 +145,8 @@ namespace :ci do
 
     task :before_script do |t|
       section('BEFORE_SCRIPT')
-      sh %(cp #{ENV['TRAVIS_BUILD_DIR']}/ci/resources/datadog.conf.example\
-           #{ENV['TRAVIS_BUILD_DIR']}/datadog.conf)
+      sh %(cp #{ENV['TRAVIS_BUILD_DIR']}/ci/resources/oneapm-ci-agent.conf.example\
+           #{ENV['TRAVIS_BUILD_DIR']}/oneapm-ci-agent.conf)
       t.reenable
     end
 

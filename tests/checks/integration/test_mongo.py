@@ -19,7 +19,7 @@ class TestMongo(unittest.TestCase):
     def testMongoCheck(self):
         self.agentConfig = {
             'version': '0.1',
-            'api_key': 'toto'
+            'license_key': 'toto'
         }
 
         self.config = {

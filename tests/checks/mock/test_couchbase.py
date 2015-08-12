@@ -21,7 +21,7 @@ class CouchbaseTestCase(unittest.TestCase):
         }
         self.agentConfig = {
             'version': '0.1',
-            'api_key': 'toto'
+            'license_key': 'toto'
         }
         self.check = load_check('couchbase', self.config, self.agentConfig)
 

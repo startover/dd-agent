@@ -16,7 +16,7 @@ DEFAULT_HOST = 'localhost'
 DEFAULT_PORT = '9001'
 DEFAULT_SOCKET_IP = 'http://127.0.0.1'
 
-DD_STATUS = {
+CI_STATUS = {
     'STOPPED': AgentCheck.CRITICAL,
     'STARTING': AgentCheck.UNKNOWN,
     'RUNNING': AgentCheck.OK,
@@ -129,7 +129,7 @@ class SupervisordCheck(AgentCheck):
                     '%s:%s' % (PROCESS_TAG, proc_name)]
 
             # Report Service Check
-            status = DD_STATUS[proc['statename']]
+            status = CI_STATUS[proc['statename']]
             msg = self._build_message(proc)
             count_by_status[status] += 1
             self.service_check(PROCESS_SERVICE_CHECK,

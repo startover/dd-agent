@@ -39,18 +39,18 @@ class TestUnitDogStatsd(unittest.TestCase):
 
     def test_formatter(self):
         stats = MetricsAggregator('myhost', interval=10,
-            formatter = get_formatter({"statsd_metric_namespace": "datadog"}))
+            formatter = get_formatter({"statsd_metric_namespace": "oneapm.agent"}))
         stats.submit_packets('gauge:16|c|#tag3,tag4')
         metrics = self.sort_metrics(stats.flush())
         self.assertTrue(len(metrics) == 1)
-        self.assertTrue(metrics[0]['metric'] == "datadog.gauge")
+        self.assertTrue(metrics[0]['metric'] == "oneapm.agent.gauge")
 
         stats = MetricsAggregator('myhost', interval=10,
-            formatter = get_formatter({"statsd_metric_namespace": "datadoge."}))
+            formatter = get_formatter({"statsd_metric_namespace": "oneapm.agent."}))
         stats.submit_packets('gauge:16|c|#tag3,tag4')
         metrics = self.sort_metrics(stats.flush())
         self.assertTrue(len(metrics) == 1)
-        self.assertTrue(metrics[0]['metric'] == "datadoge.gauge")
+        self.assertTrue(metrics[0]['metric'] == "oneapm.agent.gauge")
 
         stats = MetricsAggregator('myhost', interval=10,
         formatter = get_formatter({"statsd_metric_namespace": None}))
@@ -567,12 +567,12 @@ class TestUnitDogStatsd(unittest.TestCase):
         stats = MetricsAggregator('myhost')
         for i in xrange(10):
             stats.submit_packets('metric:10|c')
-        stats.send_packet_count('datadog.dogstatsd.packet.count')
+        stats.send_packet_count('oneapm.agent.dogstatsd.packet.count')
         metrics = self.sort_metrics(stats.flush())
         nt.assert_equals(2, len(metrics))
         first, second = metrics
 
-        nt.assert_equal(first['metric'], 'datadog.dogstatsd.packet.count')
+        nt.assert_equal(first['metric'], 'oneapm.agent.dogstatsd.packet.count')
         nt.assert_equal(first['points'][0][1], 10)
 
     @attr(requires='core_integration')

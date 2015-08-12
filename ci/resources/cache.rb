@@ -60,9 +60,9 @@ class Cache
     end
   end
 
-  CASHER_URL = 'https://raw.githubusercontent.com/DataDog/casher/%s/bin/casher'
+  CASHER_URL = 'https://raw.githubusercontent.com/OneAPM/casher/%s/bin/casher'
   USE_RUBY   = '1.9.3'
-  BIN_PATH   = '$DD_CASHER_DIR/bin/casher'
+  BIN_PATH   = '$CI_CASHER_DIR/bin/casher'
 
   attr_reader :data, :slug, :start, :msgs
   attr_accessor :directories
@@ -94,7 +94,7 @@ class Cache
   end
 
   def install
-    `mkdir -p $DD_CASHER_DIR/bin/`
+    `mkdir -p $CI_CASHER_DIR/bin/`
     `curl #{casher_url} #{debug_flags} -L -o #{BIN_PATH} -s --fail`
     `[ $? -ne 0 ] && echo 'Failed to fetch casher from GitHub, disabling cache.' && echo > #{BIN_PATH}`
 

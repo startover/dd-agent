@@ -1,5 +1,5 @@
 #!/bin/sh
 
-PATH=/opt/datadog-agent/embedded/bin:/opt/datadog-agent/bin:$PATH
+PATH=/opt/oneapm-ci-agent/embedded/bin:/opt/oneapm-ci-agent/bin:$PATH
 
-exec /opt/datadog-agent/bin/supervisord -c /etc/dd-agent/supervisor.conf --pidfile /var/run/datadog-supervisord.pid
+exec /opt/oneapm-ci-agent/bin/supervisord -c /etc/oneapm-ci-agent/supervisor.conf --pidfile /var/run/oneapm-agent-supervisord.pid

@@ -7,7 +7,7 @@ import time
 # 3rd party
 import yaml
 
-# datadog
+# oneapm-ci-agent
 from config import _windows_commondata_path, get_confd_path
 from util import yDumper
 from utils.pidfile import PidFile
@@ -27,13 +27,13 @@ def jmx_command(args, agent_config, redirect_std_streams=False):
     if len(args) < 1 or args[0] not in JMX_LIST_COMMANDS.keys():
         print "#" * 80
         print "JMX tool to be used to help configuring your JMX checks."
-        print "See http://docs.datadoghq.com/integrations/java/ for more information"
+        print "See http://support.oneapm.com/ for more information"
         print "#" * 80
         print "\n"
         print "You have to specify one of the following commands:"
         for command, desc in JMX_LIST_COMMANDS.iteritems():
             print "      - %s [OPTIONAL: LIST OF CHECKS]: %s" % (command, desc)
-        print "Example: sudo /etc/init.d/datadog-agent jmx list_matching_attributes tomcat jmx solr"
+        print "Example: sudo /etc/init.d/oneapm-ci-agent jmx list_matching_attributes tomcat jmx solr"
         print "\n"
 
     else:
@@ -50,7 +50,7 @@ def jmx_command(args, agent_config, redirect_std_streams=False):
         else:
             print "Couldn't find any valid JMX configuration in your conf.d directory: %s" % confd_directory
             print "Have you enabled any JMX check ?"
-            print "If you think it's not normal please get in touch with Datadog Support"
+            print "If you think it's not normal please get in touch with OneAPM Support"
 
 
 class JMXFiles(object):
@@ -64,7 +64,7 @@ class JMXFiles(object):
     @classmethod
     def _get_dir(cls):
         if Platform.is_win32():
-            path = os.path.join(_windows_commondata_path(), 'Datadog')
+            path = os.path.join(_windows_commondata_path(), 'OneAPM')
         elif os.path.isdir(PidFile.get_dir()):
             path = PidFile.get_dir()
         else:

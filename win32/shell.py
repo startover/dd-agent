@@ -4,7 +4,7 @@ def shell():
     from config import get_version
 
     print """
-Datadog Agent v%s - Python Shell
+OneAPM Agent v%s - Python Shell
 
     """ % (get_version())
     while True:

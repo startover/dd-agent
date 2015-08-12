@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 class GraphiteServer(TCPServer):
 
     def __init__(self, app, hostname, io_loop=None, ssl_options=None, **kwargs):
-        log.warn('Graphite listener is started -- if you do not need graphite, turn it off in datadog.conf.')
+        log.warn('Graphite listener is started -- if you do not need graphite, turn it off in oneapm-ci-agent.conf.')
         log.warn('Graphite relay uses pickle to transport messages. Pickle is not secured against remote execution exploits.')
         log.warn('See http://blog.nelhage.com/2011/03/exploiting-pickle/ for more details')
         self.app = app
@@ -80,7 +80,7 @@ class GraphiteConnection(object):
 
     def _processMetric(self, metric, datapoint):
         """Parse the metric name to fetch (host, metric, device) and
-            send the datapoint to datadog"""
+            send the datapoint to OneAPM"""
 
         log.debug("New metric: %s, values: %s" % (metric, datapoint))
         (metric, host, device) = self._parseMetric(metric)

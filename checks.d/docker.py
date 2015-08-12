@@ -249,16 +249,16 @@ class Docker(AgentCheck):
                 skipped_container_ids.append(container['Id'])
                 continue
 
-            for key, (dd_key, metric_type) in DOCKER_METRICS.iteritems():
+            for key, (ci_key, metric_type) in DOCKER_METRICS.iteritems():
                 if key in container:
-                    getattr(self, metric_type)(dd_key, int(container[key]), tags=container_tags)
+                    getattr(self, metric_type)(ci_key, int(container[key]), tags=container_tags)
             for cgroup in CGROUP_METRICS:
                 stat_file = self._get_cgroup_file(cgroup["cgroup"], container['Id'], cgroup['file'])
                 stats = self._parse_cgroup_file(stat_file)
                 if stats:
-                    for key, (dd_key, metric_type, common_metric) in cgroup['metrics'].iteritems():
+                    for key, (ci_key, metric_type, common_metric) in cgroup['metrics'].iteritems():
                         if key in stats and (common_metric or collect_uncommon_metrics):
-                            getattr(self, metric_type)(dd_key, int(stats[key]), tags=container_tags)
+                            getattr(self, metric_type)(ci_key, int(stats[key]), tags=container_tags)
         if use_filters:
             self.log.debug("List of excluded containers: {0}".format(skipped_container_ids))
 
@@ -388,7 +388,7 @@ class Docker(AgentCheck):
             request = self.url_opener.open(req)
         except urllib2.URLError, e:
             if "Errno 13" in str(e):
-                raise Exception("Unable to connect to socket. dd-agent user must be part of the 'docker' group")
+                raise Exception("Unable to connect to socket. oneapm-ci-agent user must be part of the 'docker' group")
             raise
 
         response = request.read()

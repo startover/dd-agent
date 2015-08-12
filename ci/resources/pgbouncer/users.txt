@@ -1,1 +1,1 @@
-"datadog" "datadog"
+"oneapm_ci_agent" "oneapm_ci_agent"

@@ -15,7 +15,7 @@ from checks.check_status import (
     STATUS_ERROR,
     STATUS_OK,
 )
-from checks.datadog import DdForwarder, Dogstreams
+from checks.agent import DdForwarder, Dogstreams
 from checks.ganglia import Ganglia
 import checks.system.unix as u
 import checks.system.win32 as w32
@@ -38,7 +38,7 @@ log = logging.getLogger(__name__)
 
 FLUSH_LOGGING_PERIOD = 10
 FLUSH_LOGGING_INITIAL = 5
-DD_CHECK_TAG = 'dd_check:{0}'
+CI_CHECK_TAG = 'ci_check:{0}'
 
 
 class AgentPayload(collections.MutableMapping):
@@ -52,7 +52,7 @@ class AgentPayload(collections.MutableMapping):
     METADATA_KEYS = frozenset(['meta', 'tags', 'host-tags', 'systemStats',
                                'agent_checks', 'gohai', 'external_host_tags'])
 
-    DUPLICATE_KEYS = frozenset(['apiKey', 'agentVersion'])
+    DUPLICATE_KEYS = frozenset(['licenseKey', 'agentVersion'])
 
     COMMON_ENDPOINT = ''
     DATA_ENDPOINT = 'metrics'
@@ -172,9 +172,9 @@ class Collector(object):
                 'start': time.time(),
                 'interval': int(agentConfig.get('agent_checks_interval', 10 * 60))
             },
-            'dd_check_tags': {
+            'ci_check_tags': {
                 'start': time.time(),
-                'interval': int(agentConfig.get('dd_check_tags_interval', 10 * 60))
+                'interval': int(agentConfig.get('ci_check_tags_interval', 10 * 60))
             },
         }
         socket.setdefaulttimeout(15)
@@ -351,7 +351,7 @@ class Collector(object):
 
         # metrics about the forwarder
         if ddforwarderData:
-            payload['datadog'] = ddforwarderData
+            payload['oneapm'] = ddforwarderData
 
         # Resources checks
         if self.os != 'windows':
@@ -372,7 +372,7 @@ class Collector(object):
 
             if has_resource:
                 payload['resources']['meta'] = {
-                    'api_key': self.agentConfig['api_key'],
+                    'license_key': self.agentConfig['license_key'],
                     'host': payload['internalHostname'],
                 }
 
@@ -436,7 +436,7 @@ class Collector(object):
                 status = AgentCheck.OK
             elif check_status.status == STATUS_ERROR:
                 status = AgentCheck.CRITICAL
-            check.service_check('datadog.agent.check_status', status, tags=service_check_tags)
+            check.service_check('oneapm.agent.check_status', status, tags=service_check_tags)
 
             # Collect the service checks and save them in the payload
             current_check_service_checks = check.get_service_checks()
@@ -453,7 +453,7 @@ class Collector(object):
 
             # Intrument check run timings if enabled.
             if self.check_timings:
-                metric = 'datadog.agent.check_run_time'
+                metric = 'oneapm.agent.check_run_time'
                 meta = {'tags': ["check:%s" % check.name]}
                 metrics.append((metric, time.time(), check_run_time, meta))
 
@@ -466,7 +466,7 @@ class Collector(object):
             check_statuses.append(check_status)
 
         # Add a service check for the agent
-        service_checks.append(create_service_check('datadog.agent.up', AgentCheck.OK,
+        service_checks.append(create_service_check('oneapm.agent.up', AgentCheck.OK,
                               hostname=self.hostname))
 
         # Store the metrics and events in the payload.
@@ -606,7 +606,7 @@ class Collector(object):
         payload['os'] = self.os
         payload['python'] = sys.version
         payload['agentVersion'] = self.agentConfig['version']
-        payload['apiKey'] = self.agentConfig['api_key']
+        payload['licenseKey'] = self.agentConfig['license_key']
         payload['events'] = {}
         payload['metrics'] = []
         payload['service_checks'] = []
@@ -627,7 +627,7 @@ class Collector(object):
             payload['systemStats'] = self.agentConfig.get('system_stats', {})
             # Also post an event in the newsfeed
             payload['events']['System'] = [{
-                'api_key': self.agentConfig['api_key'],
+                'license_key': self.agentConfig['license_key'],
                 'host': payload['internalHostname'],
                 'timestamp': now,
                 'event_type':'Agent Startup',
@@ -726,11 +726,11 @@ class Collector(object):
             payload['agent_checks'] = agent_checks
             payload['meta'] = self.hostname_metadata_cache  # add hostname metadata
 
-        # If required by the user, let's create the dd_check:xxx host tags
-        if self.agentConfig['create_dd_check_tags'] and \
-                self._should_send_additional_data('dd_check_tags'):
-            app_tags_list = [DD_CHECK_TAG.format(c.name) for c in self.initialized_checks_d]
-            app_tags_list.extend([DD_CHECK_TAG.format(cname) for cname
+        # If required by the user, let's create the ci_check:xxx host tags
+        if self.agentConfig['create_ci_check_tags'] and \
+                self._should_send_additional_data('ci_check_tags'):
+            app_tags_list = [CI_CHECK_TAG.format(c.name) for c in self.initialized_checks_d]
+            app_tags_list.extend([CI_CHECK_TAG.format(cname) for cname
                                   in JMXFiles.get_jmx_appnames()])
 
             if 'system' not in payload['host-tags']:

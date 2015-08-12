@@ -19,7 +19,7 @@ class ServiceCheckTestCase(AgentCheckTest):
     def testHTTPHeaders(self):
         agentConfig = {
             'version': AGENT_VERSION,
-            'api_key': 'toto'
+            'license_key': 'toto'
         }
 
         config = {
@@ -73,7 +73,7 @@ class ServiceCheckTestCase(AgentCheckTest):
             "https://google.com based on configuration", count=1)
         self.assertWarning("Using events for service checks is deprecated in "
             "favor of monitors and will be removed in future versions of the "
-            "Datadog Agent.", count=3)
+            "OneAPM Agent.", count=3)
 
         self.check.stop()
 
@@ -144,7 +144,7 @@ class ServiceCheckTestCase(AgentCheckTest):
                 'timeout': 1,
                 'name': 'DownService2'
             },{
-                'host': 'datadoghq.com',
+                'host': 'oneapm.com',
                 'port': 80,
                 'timeout': 1,
                 'name': 'UpService'
@@ -179,7 +179,7 @@ class ServiceCheckTestCase(AgentCheckTest):
         expected_tags = ["instance:DownService2", "target_host:126.0.0.1", "port:65530"]
         self.assertServiceCheck("tcp.can_connect", status=2, tags=expected_tags)
 
-        expected_tags = ["instance:UpService", "target_host:datadoghq.com", "port:80"]
+        expected_tags = ["instance:UpService", "target_host:oneapm.com", "port:80"]
         self.assertServiceCheck("tcp.can_connect", status=0, tags=expected_tags)
 
         self.check.stop()

@@ -33,7 +33,7 @@ class SshTestCase(unittest.TestCase):
             }, {
                 'host': 'wronghost',
                 'port': 22,
-                'username': 'datadog01',
+                'username': 'oneapm-ci-agent01',
                 'password': 'abcd',
                 'sftp_check': False,
                 'private_key_file': '',

@@ -117,5 +117,5 @@ class WMICheck(AgentCheck):
                 except AttributeError:
                     raise Exception('Invalid metric type: {0}'.format(mtype))
 
-                # submit the metric to datadog
+                # submit the metric to oneapm
                 func(name, val, tags=tags)

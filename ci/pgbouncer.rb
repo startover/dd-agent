@@ -36,10 +36,10 @@ namespace :ci do
       sh %(#{pgb_rootdir}/pgbouncer -d #{pgb_rootdir}/pgbouncer.ini)
       # Wait for pgbouncer to start
       Wait.for 15_433
-      sh %(PGPASSWORD=datadog #{pg_rootdir}/bin/psql\
-           -h localhost -p 15433 -U datadog -w\
+      sh %(PGPASSWORD=oneapm_ci_agent #{pg_rootdir}/bin/psql\
+           -h localhost -p 15433 -U oneapm_ci_agent -w\
            -c "SELECT * FROM persons"\
-           datadog_test)
+           oneapm_ci_agent_test)
       sleep_for 5
     end
 

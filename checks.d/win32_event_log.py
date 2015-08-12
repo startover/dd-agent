@@ -58,9 +58,9 @@ class Win32EventLog(AgentCheck):
         self.log.debug("Querying for Event Log events: %s" % wql)
         events = w.query(wql)
 
-        # Save any events returned to the payload as Datadog events
+        # Save any events returned to the payload as OneAPM events
         for ev in events:
-            log_ev = LogEvent(ev, self.agentConfig.get('api_key', ''),
+            log_ev = LogEvent(ev, self.agentConfig.get('license_key', ''),
                               self.hostname, tags, notify)
 
             # Since WQL only compares on the date and NOT the time, we have to
@@ -150,9 +150,9 @@ class EventLogQuery(object):
 
 
 class LogEvent(object):
-    def __init__(self, ev, api_key, hostname, tags, notify_list):
+    def __init__(self, ev, license_key, hostname, tags, notify_list):
         self.event = ev
-        self.api_key = api_key
+        self.license_key = license_key
         self.hostname = hostname
         self.tags = tags
         self.notify_list = notify_list
@@ -162,7 +162,7 @@ class LogEvent(object):
         return {
             'timestamp': self.timestamp,
             'event_type': EVENT_TYPE,
-            'api_key': self.api_key,
+            'license_key': self.license_key,
             'msg_title': self._msg_title(self.event),
             'msg_text': self._msg_text(self.event).strip(),
             'aggregation_key': self._aggregation_key(self.event),
@@ -208,7 +208,7 @@ class LogEvent(object):
 
     def _alert_type(self, event):
         event_type = event.Type
-        # Convert to a Datadog alert type
+        # Convert to a OneAPM alert type
         if event_type == 'Warning':
             return 'warning'
         elif event_type == 'Error':

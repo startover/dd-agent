@@ -1,7 +1,7 @@
-Testing & dd-agent
+Testing & oneapm-ci-agent
 ==================
 
-[![Build Status](https://travis-ci.org/DataDog/dd-agent.svg)](https://travis-ci.org/DataDog/dd-agent) [![Build status](https://ci.appveyor.com/api/projects/status/y7v5la94393mi5lc?svg=true)](https://ci.appveyor.com/project/Datadog/dd-agent)
+[![Build Status](https://travis-ci.org/OneAPM/oneapm-ci-agent.svg)](https://travis-ci.org/OneAPM/oneapm-ci-agent) [![Build status](https://ci.appveyor.com/api/projects/status/y7v5la94393mi5lc?svg=true)](https://ci.appveyor.com/project/OneAPM/oneapm-ci-agent)
 
 # Lint
 

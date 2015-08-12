@@ -487,7 +487,7 @@ class ESCheck(AgentCheck):
                         shard_name = 'R' + i_str
 
                     # Let's add some interesting tags that will enable us to
-                    # slice and dice as we wish in DatadogHQ
+                    # slice and dice as we wish in OneAPMHQ
                     es_shard_tags = ["es_node:{0}".format(node),
                                      "es_shard:{0}".format(shard_name),
                                      "es_index:{0}".format(index_name),
@@ -523,7 +523,7 @@ class ESCheck(AgentCheck):
     def _process_metric(self, data, metric, xtype, path, xform=None,
                         tags=None, hostname=None):
         """data: dictionary containing all the stats
-        metric: datadog metric
+        metric: agent metric
         path: corresponding path in data, flattened, e.g. thread_pool.bulk.queue
         xfom: a lambda to apply to the numerical value
         """

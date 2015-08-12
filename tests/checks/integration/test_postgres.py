@@ -13,14 +13,14 @@ class TestPostgres(AgentCheckTest):
     def test_checks(self):
         host = 'localhost'
         port = 15432
-        dbname = 'datadog_test'
+        dbname = 'oneapm-ci-agent_test'
 
         instances = [
             {
                 'host': host,
                 'port': port,
-                'username': 'datadog',
-                'password': 'datadog',
+                'username': 'oneapm-ci-agent',
+                'password': 'oneapm-ci-agent',
                 'dbname': dbname,
                 'relations': ['persons'],
                 'custom_metrics': [{
@@ -28,15 +28,15 @@ class TestPostgres(AgentCheckTest):
                     'metrics': {
                         'numbackends': ['custom.numbackends', 'Gauge'],
                     },
-                    'query': "SELECT datname, %s FROM pg_stat_database WHERE datname = 'datadog_test' LIMIT(1)",
+                    'query': "SELECT datname, %s FROM pg_stat_database WHERE datname = 'oneapm-ci-agent_test' LIMIT(1)",
                     'relation': False,
                 }]
             },
             {
                 'host': host,
                 'port': port,
-                'username': 'datadog',
-                'password': 'datadog',
+                'username': 'oneapm-ci-agent',
+                'password': 'oneapm-ci-agent',
                 'dbname': 'dogs',
                 'relations': ['breed', 'kennel']
             }
@@ -65,7 +65,7 @@ class TestPostgres(AgentCheckTest):
         ]
 
         for mname in COMMON_METRICS:
-            for db in ('datadog_test', 'dogs'):
+            for db in ('oneapm-ci-agent_test', 'dogs'):
                 self.assertMetric(mname, count=1, tags=['db:%s' % db])
 
         NEWER_92_METRICS = [
@@ -76,7 +76,7 @@ class TestPostgres(AgentCheckTest):
 
         if self.check._is_9_2_or_above(key, db):
             for mname in NEWER_92_METRICS:
-                for db in ('datadog_test', 'dogs'):
+                for db in ('oneapm-ci-agent_test', 'dogs'):
                     self.assertMetric(mname, count=1, tags=['db:%s' % db])
 
         # Testing BGW_METRICS scope
@@ -201,12 +201,12 @@ class TestPostgres(AgentCheckTest):
         self.assertMetric('postgresql.db.count', value=2, count=1)
 
         # Our custom metric
-        self.assertMetric('custom.numbackends', value=1, tags=['customdb:datadog_test'])
+        self.assertMetric('custom.numbackends', value=1, tags=['customdb:oneapm-ci-agent_test'])
 
         # Test service checks
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,
-            tags=['host:localhost', 'port:15432', 'db:datadog_test']
+            tags=['host:localhost', 'port:15432', 'db:oneapm-ci-agent_test']
         )
         self.assertServiceCheck('postgres.can_connect',
             count=1, status=AgentCheck.OK,

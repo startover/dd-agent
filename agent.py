@@ -1,14 +1,4 @@
-#!/opt/datadog-agent/embedded/bin/python
-'''
-    Datadog
-    www.datadoghq.com
-    ----
-    Make sense of your IT Data
-
-    Licensed under Simplified BSD License (see LICENSE)
-    (C) Boxed Ice 2010 all rights reserved
-    (C) Datadog, Inc. 2010-2014 all rights reserved
-'''
+#!/opt/oneapm-ci-agent/embedded/bin/python
 # set up logging before importing any other components
 from config import get_version, initialize_logging # noqa
 initialize_logging('collector')
@@ -45,11 +35,11 @@ from utils.pidfile import PidFile
 from utils.profile import AgentProfiler
 
 # Constants
-PID_NAME = "dd-agent"
+PID_NAME = "oneapm-ci-agent"
 WATCHDOG_MULTIPLIER = 10
 RESTART_INTERVAL = 4 * 24 * 60 * 60  # Defaults to 4 days
 START_COMMANDS = ['start', 'restart', 'foreground']
-DD_AGENT_COMMANDS = ['check', 'flare', 'jmx']
+CI_AGENT_COMMANDS = ['check', 'flare', 'jmx']
 
 DEFAULT_COLLECTOR_PROFILE_INTERVAL = 20
 
@@ -243,14 +233,8 @@ def main():
         sys.stderr.write("Unknown command: %s\n" % command)
         return 3
 
-    # Deprecation notice
-    if command not in DD_AGENT_COMMANDS:
-        # Will become an error message and exit after deprecation period
-        from utils.deprecations import deprecate_old_command_line_tools
-        deprecate_old_command_line_tools()
-
     if command in COMMANDS_AGENT:
-        agent = Agent(PidFile('dd-agent').get_path(), autorestart, in_developer_mode=in_developer_mode)
+        agent = Agent(PidFile('oneapm-ci-agent').get_path(), autorestart, in_developer_mode=in_developer_mode)
 
     if command in START_COMMANDS:
         log.info('Agent version %s' % get_version())

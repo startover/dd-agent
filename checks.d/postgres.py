@@ -297,9 +297,6 @@ SELECT relname,
         metrics = self.instance_metrics.get(key)
 
         if metrics is None:
-            # Hack to make sure that if we have multiple instances that connect to
-            # the same host, port, we don't collect metrics twice
-            # as it will result in https://github.com/DataDog/dd-agent/issues/1211
             sub_key = key[:2]
             if sub_key in self.db_instance_metrics:
                 self.instance_metrics[key] = None
@@ -325,9 +322,6 @@ SELECT relname,
         metrics = self.bgw_metrics.get(key)
 
         if metrics is None:
-            # Hack to make sure that if we have multiple instances that connect to
-            # the same host, port, we don't collect metrics twice
-            # as it will result in https://github.com/DataDog/dd-agent/issues/1211
             sub_key = key[:2]
             if sub_key in self.db_bgw_metrics:
                 self.bgw_metrics[key] = None
@@ -488,7 +482,7 @@ SELECT relname,
                             pass
 
                     # Build tags
-                    # descriptors are: (pg_name, dd_tag_name): value
+                    # descriptors are: (pg_name, ci_tag_name): value
                     # Special-case the "db" tag, which overrides the one that is passed as instance_tag
                     # The reason is that pg_stat_database returns all databases regardless of the
                     # connection.
@@ -500,7 +494,7 @@ SELECT relname,
                     tags += [("%s:%s" % (k,v)) for (k,v) in desc_map.iteritems()]
 
                     # [(metric-map, value), (metric-map, value), ...]
-                    # metric-map is: (dd_name, "rate"|"gauge")
+                    # metric-map is: (ci_name, "rate"|"gauge")
                     # shift the results since the first columns will be the "descriptors"
                     values = zip([scope['metrics'][c] for c in cols], row[len(desc):])
 

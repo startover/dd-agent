@@ -1,6 +1,6 @@
-#!/opt/datadog-agent/embedded/bin/python
+#!/opt/oneapm-ci-agent/embedded/bin/python
 """
-A Python Statsd implementation with some datadog special sauce.
+A Python Statsd implementation with some oneapm special sauce.
 """
 
 # set up logging before importing any other components
@@ -83,7 +83,7 @@ class Reporter(threading.Thread):
     server.
     """
 
-    def __init__(self, interval, metrics_aggregator, api_host, api_key=None,
+    def __init__(self, interval, metrics_aggregator, api_host, license_key=None,
                  use_watchdog=False, event_chunk_size=None):
         threading.Thread.__init__(self)
         self.interval = int(interval)
@@ -97,7 +97,7 @@ class Reporter(threading.Thread):
             from util import Watchdog
             self.watchdog = Watchdog(WATCHDOG_TIMEOUT)
 
-        self.api_key = api_key
+        self.license_key = license_key
         self.api_host = api_host
         self.event_chunk_size = event_chunk_size or EVENT_CHUNK_SIZE
 
@@ -115,7 +115,7 @@ class Reporter(threading.Thread):
 
         while not self.finished.isSet():  # Use camel case isSet for 2.4 support.
             self.finished.wait(self.interval)
-            self.metrics_aggregator.send_packet_count('datadog.dogstatsd.packet.count')
+            self.metrics_aggregator.send_packet_count('oneapm.agent.dogstatsd.packet.count')
             self.flush()
             if self.watchdog:
                 self.watchdog.reset()
@@ -175,8 +175,8 @@ class Reporter(threading.Thread):
     def submit(self, metrics):
         body, headers = serialize_metrics(metrics)
         params = {}
-        if self.api_key:
-            params['api_key'] = self.api_key
+        if self.license_key:
+            params['license_key'] = self.license_key
         url = '%s/api/v1/series?%s' % (self.api_host, urlencode(params))
         self.submit_http(url, body, headers)
 
@@ -186,7 +186,7 @@ class Reporter(threading.Thread):
 
         for chunk in chunks(events, event_chunk_size):
             payload = {
-                'apiKey': self.api_key,
+                'licenseKey': self.license_key,
                 'events': {
                     'api': chunk
                 },
@@ -194,8 +194,8 @@ class Reporter(threading.Thread):
                 'internalHostname': get_hostname()
             }
             params = {}
-            if self.api_key:
-                params['api_key'] = self.api_key
+            if self.license_key:
+                params['license_key'] = self.license_key
             url = '%s/intake?%s' % (self.api_host, urlencode(params))
 
             self.submit_http(url, json.dumps(payload), headers)
@@ -225,8 +225,8 @@ class Reporter(threading.Thread):
         headers = {'Content-Type':'application/json'}
 
         params = {}
-        if self.api_key:
-            params['api_key'] = self.api_key
+        if self.license_key:
+            params['license_key'] = self.license_key
 
         url = '{0}/api/v1/check_run?{1}'.format(self.api_host, urlencode(params))
         self.submit_http(url, json.dumps(service_checks), headers)
@@ -375,7 +375,7 @@ def init(config_path=None, use_watchdog=False, use_forwarder=False, args=None):
 
     port = c['dogstatsd_port']
     interval = DOGSTATSD_FLUSH_INTERVAL
-    api_key = c['api_key']
+    license_key = c['license_key']
     aggregator_interval = DOGSTATSD_AGGREGATOR_BUCKET_SIZE
     non_local_traffic = c['non_local_traffic']
     forward_to_host = c.get('statsd_forward_host')
@@ -383,7 +383,7 @@ def init(config_path=None, use_watchdog=False, use_forwarder=False, args=None):
     event_chunk_size = c.get('event_chunk_size')
     recent_point_threshold = c.get('recent_point_threshold', None)
 
-    target = c['dd_url']
+    target = c['ci_url']
     if use_forwarder:
         target = c['dogstatsd_target']
 
@@ -404,7 +404,7 @@ def init(config_path=None, use_watchdog=False, use_forwarder=False, args=None):
     )
 
     # Start the reporting thread.
-    reporter = Reporter(interval, aggregator, target, api_key, use_watchdog, event_chunk_size)
+    reporter = Reporter(interval, aggregator, target, license_key, use_watchdog, event_chunk_size)
 
     # Start the server on an IPv4 stack
     # Default to loopback
@@ -420,9 +420,6 @@ def init(config_path=None, use_watchdog=False, use_forwarder=False, args=None):
 
 def main(config_path=None):
     """ The main entry point for the unix version of dogstatsd. """
-    # Deprecation notice
-    from utils.deprecations import deprecate_old_command_line_tools
-    deprecate_old_command_line_tools()
 
     COMMANDS_START_DOGSTATSD = [
         'start',

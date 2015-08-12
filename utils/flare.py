@@ -58,10 +58,10 @@ def configcheck():
         else:
             print "%s is valid" % basename
     if all_valid:
-        print "All yaml files passed. You can now run the Datadog agent."
+        print "All yaml files passed. You can now run the OneAPM agent."
         return 0
     else:
-        print("Fix the invalid yaml files above in order to start the Datadog agent. "
+        print("Fix the invalid yaml files above in order to start the OneAPM agent. "
               "A useful external tool for yaml parsing can be found at "
               "http://yaml-online-parser.appspot.com/")
         return 1
@@ -70,15 +70,15 @@ def configcheck():
 class Flare(object):
     """
     Compress all important logs and configuration files for debug,
-    and then send them to Datadog (which transfers them to Support)
+    and then send them to OneAPM (which transfers them to Support)
     """
 
-    DATADOG_SUPPORT_URL = '/support/flare'
+    ONEAPM_SUPPORT_URL = '/support/flare'
     PASSWORD_REGEX = re.compile('( *(\w|_)*pass(word)?:).+')
     COMMENT_REGEX = re.compile('^ *#.*')
-    APIKEY_REGEX = re.compile('^api_key: *\w+(\w{5})$')
-    REPLACE_APIKEY = r'api_key: *************************\1'
-    COMPRESSED_FILE = 'datadog-agent-{0}.tar.bz2'
+    LICENSEKEY_REGEX = re.compile('^license_key: *\w+(\w{5})$')
+    REPLACE_LICENSEKEY = r'license_key: *************************\1'
+    COMPRESSED_FILE = 'oneapm-ci-agent-{0}.tar.bz2'
     # We limit to 10MB arbitrarily
     MAX_UPLOAD_SIZE = 10485000
     TIMEOUT = 60
@@ -90,13 +90,13 @@ class Flare(object):
         self._init_permissions_file()
         self._save_logs_path()
         self._config = get_config()
-        self._api_key = self._config.get('api_key')
+        self._license_key = self._config.get('license_key')
         self._url = "{0}{1}".format(
-            get_url_endpoint(self._config.get('dd_url'), endpoint_type='flare'),
-            self.DATADOG_SUPPORT_URL
+            get_url_endpoint(self._config.get('ci_url'), endpoint_type='flare'),
+            self.ONEAPM_SUPPORT_URL
         )
         self._hostname = get_hostname(self._config)
-        self._prefix = "datadog-{0}".format(self._hostname)
+        self._prefix = "oneapm-ci-agent-{0}".format(self._hostname)
 
     # On Unix system, check that the user is root (to call supervisorctl & status)
     # Otherwise emit a warning, and ask for confirmation
@@ -114,17 +114,17 @@ class Flare(object):
 
     # Collect all conf and logs files and compress them
     def collect(self):
-        if not self._api_key:
-            raise Exception('No api_key found')
+        if not self._license_key:
+            raise Exception('No license_key found')
         log.info("Collecting logs and configuration files:")
 
         self._add_logs_tar()
         self._add_conf_tar()
-        log.info("  * datadog-agent configcheck output")
+        log.info("  * oneapm-ci-agent configcheck output")
         self._add_command_output_tar('configcheck.log', configcheck)
-        log.info("  * datadog-agent status output")
+        log.info("  * oneapm-ci-agent status output")
         self._add_command_output_tar('status.log', self._supervisor_status)
-        log.info("  * datadog-agent info output")
+        log.info("  * oneapm-ci-agent info output")
         self._add_command_output_tar('info.log', self._info_all)
         self._add_jmxinfo_tar()
         log.info("  * pip freeze")
@@ -149,11 +149,11 @@ class Flare(object):
         if not email:
             email = self._ask_for_email()
 
-        log.info("Uploading {0} to Datadog Support".format(self._tar_path))
+        log.info("Uploading {0} to OneAPM Support".format(self._tar_path))
         url = self._url
         if self._case_id:
             url = '{0}/{1}'.format(self._url, str(self._case_id))
-        url = "{0}?api_key={1}".format(url, self._api_key)
+        url = "{0}?license_key={1}".format(url, self._license_key)
         requests_options = {
             'data': {
                 'case_id': self._case_id,
@@ -167,7 +167,7 @@ class Flare(object):
             requests_options['verify'] = os.path.realpath(os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
                 os.pardir, os.pardir,
-                'datadog-cert.pem'
+                'oneapm-ci-agent-cert.pem'
             ))
 
         self._resp = requests.post(url, **requests_options)
@@ -232,7 +232,7 @@ class Flare(object):
         if self._can_read(conf_path):
             self._add_file_tar(
                 self._strip_comment(conf_path),
-                os.path.join('etc', 'datadog.conf'),
+                os.path.join('etc', 'oneapm-ci-agent.conf'),
                 original_file_path=conf_path
             )
 
@@ -271,7 +271,7 @@ class Flare(object):
 
             # beans lists
             for command in ['list_matching_attributes', 'list_everything']:
-                log.info("  * datadog-agent jmx {0} output".format(command))
+                log.info("  * oneapm-ci-agent jmx {0} output".format(command))
                 self._add_command_output_tar(
                     os.path.join('jmxinfo', '{0}.log'.format(command)),
                     partial(self._jmx_command_call, command)
@@ -335,7 +335,7 @@ class Flare(object):
             with open(file_path, 'r') as orig_file:
                 for line in orig_file.readlines():
                     if not self.COMMENT_REGEX.match(line):
-                        temp_file.write(re.sub(self.APIKEY_REGEX, self.REPLACE_APIKEY, line))
+                        temp_file.write(re.sub(self.LICENSEKEY_REGEX, self.REPLACE_LICENSEKEY, line))
 
         return temp_path
 
@@ -425,9 +425,9 @@ class Flare(object):
     # Find the agent exec (package or source)
     def _get_path_agent_exec(self):
         if Platform.is_mac():
-            agent_exec = '/opt/datadog-agent/bin/datadog-agent'
+            agent_exec = '/opt/oneapm-ci-agent/bin/oneapm-ci-agent'
         else:
-            agent_exec = '/etc/init.d/datadog-agent'
+            agent_exec = '/etc/init.d/oneapm-ci-agent'
 
         if not os.path.isfile(agent_exec):
             agent_exec = os.path.join(
@@ -438,7 +438,7 @@ class Flare(object):
 
     # Find the supervisor exec (package or source)
     def _get_path_supervisor_exec(self):
-        supervisor_exec = '/opt/datadog-agent/bin/supervisorctl'
+        supervisor_exec = '/opt/oneapm-ci-agent/bin/supervisorctl'
         if not os.path.isfile(supervisor_exec):
             supervisor_exec = os.path.join(
                 os.path.dirname(os.path.realpath(__file__)),
@@ -449,9 +449,9 @@ class Flare(object):
     # Find the supervisor conf (package or source)
     def _get_path_supervisor_conf(self):
         if Platform.is_mac():
-            supervisor_conf = '/opt/datadog-agent/etc/supervisor.conf'
+            supervisor_conf = '/opt/oneapm-ci-agent/etc/supervisor.conf'
         else:
-            supervisor_conf = '/etc/dd-agent/supervisor.conf'
+            supervisor_conf = '/etc/oneapm-ci-agent/supervisor.conf'
 
         if not os.path.isfile(supervisor_conf):
             supervisor_conf = os.path.join(
@@ -506,7 +506,7 @@ class Flare(object):
 
     # Function to ask for confirmation before upload
     def _ask_for_confirmation(self):
-        print '{0} is going to be uploaded to Datadog.'.format(self._tar_path)
+        print '{0} is going to be uploaded to OneAPM.'.format(self._tar_path)
         choice = raw_input('Do you want to continue [Y/n]? ')
         if choice.strip().lower() not in ['yes', 'y', '']:
             print 'Aborting (you can still use {0})'.format(self._tar_path)

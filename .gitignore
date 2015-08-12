@@ -3,8 +3,8 @@ Gemfile.lock
 *.pyc
 *.*~
 build/*
-datadog.conf
-datadog_agent.egg-info/*
+oneapm-ci-agent.conf
+oneapm-ci-agent.egg-info/*
 artifacts/*
 node_modules/*
 .DS_Store

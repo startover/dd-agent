@@ -134,7 +134,7 @@ class SQLServer(AgentCheck):
         instance_key = self._conn_key(instance)
         self.instances_metrics[instance_key] = metrics_to_collect
 
-    def typed_metric(self, dd_name, sql_name, base_name, user_type, sql_type, instance_name, tag_by):
+    def typed_metric(self, ci_name, sql_name, base_name, user_type, sql_type, instance_name, tag_by):
         '''
         Create the appropriate SqlServerMetric object, each implementing its method to
         fetch the metrics properly.
@@ -158,7 +158,7 @@ class SQLServer(AgentCheck):
         else:
             metric_type, cls = metric_type_mapping[sql_type]
 
-        return cls(dd_name, sql_name, base_name,
+        return cls(ci_name, sql_name, base_name,
                    metric_type, instance_name, tag_by, self.log)
 
     def _get_access_info(self, instance):
@@ -240,7 +240,7 @@ class SQLServer(AgentCheck):
     def get_sql_type(self, instance, counter_name):
         '''
         Return the type of the performance counter so that we can report it to
-        Datadog correctly
+        OneAPM correctly
         If the sql_type is one that needs a base (PERF_RAW_LARGE_FRACTION and
         PERF_AVERAGE_BULK), the name of the base counter will also be returned
         '''
@@ -285,7 +285,7 @@ class SQLServer(AgentCheck):
             try:
                 metric.fetch_metric(cursor, custom_tags)
             except Exception, e:
-                self.log.warning("Could not fetch metric %s: %s" % (metric.datadog_name, e))
+                self.log.warning("Could not fetch metric %s: %s" % (metric.agent_name, e))
 
         self.close_cursor(cursor)
 
@@ -305,9 +305,9 @@ class SqlServerMetric(object):
     '''General class for common methods, should never be instantiated directly
     '''
 
-    def __init__(self, datadog_name, sql_name, base_name,
+    def __init__(self, agent_name, sql_name, base_name,
                  report_function, instance, tag_by, logger):
-        self.datadog_name = datadog_name
+        self.agent_name = agent_name
         self.sql_name = sql_name
         self.base_name = base_name
         self.report_function = report_function
@@ -342,7 +342,7 @@ class SqlSimpleMetric(SqlServerMetric):
             metric_tags = tags
             if self.instance == ALL_INSTANCES:
                 metric_tags = metric_tags + ['%s:%s' % (self.tag_by, instance_name.strip())]
-            self.report_function(self.datadog_name, cntr_value,
+            self.report_function(self.agent_name, cntr_value,
                                  tags=metric_tags)
 
 
@@ -382,10 +382,10 @@ class SqlFractionMetric(SqlServerMetric):
     def report_fraction(self, value, base, metric_tags):
         try:
             result = value / float(base)
-            self.report_function(self.datadog_name, result, tags=metric_tags)
+            self.report_function(self.agent_name, result, tags=metric_tags)
         except ZeroDivisionError:
             self.log.debug("Base value is 0, won't report metric %s for tags %s",
-                           self.datadog_name, metric_tags)
+                           self.agent_name, metric_tags)
 
 
 class SqlIncrFractionMetric(SqlFractionMetric):
@@ -398,8 +398,8 @@ class SqlIncrFractionMetric(SqlFractionMetric):
             diff_base = base - old_base
             try:
                 result = diff_value / float(diff_base)
-                self.report_function(self.datadog_name, result, tags=metric_tags)
+                self.report_function(self.agent_name, result, tags=metric_tags)
             except ZeroDivisionError:
                 self.log.debug("Base value is 0, won't report metric %s for tags %s",
-                               self.datadog_name, metric_tags)
+                               self.agent_name, metric_tags)
         self.past_values[key] = (value, base)

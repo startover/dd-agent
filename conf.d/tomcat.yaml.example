@@ -16,7 +16,7 @@ instances:
   #     newTag: test
 
 # List of metrics to be collected by the integration
-# Read http://docs.datadoghq.com/integrations/java/ to learn how to customize it
+# Read http://support.oneapm.com/ to learn how to customize it
 init_config:
   conf:
     - include:

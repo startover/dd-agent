@@ -1,0 +1,18 @@
+#!/bin/sh -x
+ci_base=/opt/local/oneapm-ci-agent
+source $ci_base/venv/bin/activate
+
+case "$1" in
+	start)
+		cd $ci_base && $ci_base/venv/bin/supervisord -n -c $ci_base/supervisord/supervisord.conf
+		;;
+
+	stop)
+		cd $ci_base && $ci_base/venv/bin/supervisorctl  -c $ci_base/supervisord/supervisord.conf shutdown
+		;;
+
+	*)
+		echo "Usage: $0 {start|stop}"
+		exit 2
+esac
+exit $?

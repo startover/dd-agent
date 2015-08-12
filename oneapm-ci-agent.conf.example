@@ -1,0 +1,43 @@
+[Main]
+
+# The host of the OneAPM data collector server to send Agent data to
+ci_url: https://tpm.oneapm.com
+
+# If you need a proxy to connect to the Internet, provide the settings here
+# proxy_host: my-proxy.com
+# proxy_port: 3128
+# proxy_user: user
+# proxy_password: password
+# To be used with some proxys that return a 302 which make curl switch from POST to GET
+# See http://stackoverflow.com/questions/8156073/curl-violate-rfc-2616-10-3-2-and-switch-from-post-to-get
+# proxy_forbid_method_switch: no
+
+# If you run the agent behind haproxy, you might want to set this to yes
+# skip_ssl_validation: no
+
+# The OneAPM license key to associate your Agent's data with your organization,
+# which can be found in https://tpm.oneapm.com
+license_key:
+
+# Force the hostname to whatever you want.
+#hostname: mymachine.mydomain
+
+# Set the host's tags
+#tags: mytag0, mytag1
+
+# ========================================================================== #
+# Logging
+# ========================================================================== #
+
+# log_level: INFO
+
+# collector_log_file: /var/log/oneapm-ci-agent/collector.log
+# forwarder_log_file: /var/log/oneapm-ci-agent/forwarder.log
+# dogstatsd_log_file: /var/log/oneapm-ci-agent/dogstatsd.log
+
+# if syslog is enabled but a host and port are not set, a local domain socket
+# connection will be attempted
+#
+# log_to_syslog: yes
+# syslog_host:
+# syslog_port:

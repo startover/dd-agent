@@ -112,8 +112,8 @@ class TestTransaction(unittest.TestCase):
         MetricTransaction._endpoints = []
 
         config = {
-            "dd_url": "https://foo.bar.com",
-            "api_key": "foo",
+            "ci_url": "https://foo.bar.com",
+            "license_key": "foo",
             "use_dd": True
         }
 
@@ -130,7 +130,7 @@ class TestTransaction(unittest.TestCase):
 
         transaction = MetricTransaction(None, {}, "msgtype")
         endpoints = [transaction.get_url(e) for e in transaction._endpoints]
-        expected = ['https://foo.bar.com/intake/msgtype?api_key=foo']
+        expected = ['https://foo.bar.com/intake/msgtype?license_key=foo']
         self.assertEqual(endpoints, expected, (endpoints, expected))
 
     def testEndpoints(self):
@@ -139,10 +139,10 @@ class TestTransaction(unittest.TestCase):
         Also tests that these endpoints actually exist.
         """
         MetricTransaction._endpoints = []
-        api_key = "a" * 32
+        license_key = "a" * 32
         config = {
-            "dd_url": "https://app.datadoghq.com",
-            "api_key": api_key,
+            "ci_url": "https://tpm.oneapm.com",
+            "license_key": license_key,
             "use_dd": True
         }
 
@@ -159,8 +159,7 @@ class TestTransaction(unittest.TestCase):
 
         transaction = MetricTransaction(None, {}, "msgtype")
         endpoints = [transaction.get_url(e) for e in transaction._endpoints]
-        expected = ['https://{0}-app.agent.datadoghq.com/intake/msgtype?api_key={1}'.format(
-            get_version().replace(".", "-"), api_key)]
+        expected = ['https://tpm.oneapm.com']
         self.assertEqual(endpoints, expected, (endpoints, expected))
 
         for url in endpoints:
@@ -171,8 +170,7 @@ class TestTransaction(unittest.TestCase):
         # API Metric Transaction
         transaction = APIMetricTransaction(None, {})
         endpoints = [transaction.get_url(e) for e in transaction._endpoints]
-        expected = ['https://{0}-app.agent.datadoghq.com/api/v1/series/?api_key={1}'.format(
-            get_version().replace(".", "-"), api_key)]
+        expected = ['tpm.oneapm.com']
         self.assertEqual(endpoints, expected, (endpoints, expected))
 
         for url in endpoints:
@@ -187,8 +185,7 @@ class TestTransaction(unittest.TestCase):
 
         transaction = APIServiceCheckTransaction(None, {})
         endpoints = [transaction.get_url(e) for e in transaction._endpoints]
-        expected = ['https://{0}-app.agent.datadoghq.com/api/v1/check_run/?api_key={1}'.format(
-            get_version().replace(".", "-"), api_key)]
+        expected = ['https://tpm.oneapm.com']
         self.assertEqual(endpoints, expected, (endpoints, expected))
 
         for url in endpoints:

@@ -50,8 +50,8 @@
       <!ATTLIST METRICS SOURCE (gmond) 'gmond'>
 ]>
 <GANGLIA_XML VERSION="3.1.2" SOURCE="gmetad">
-<GRID NAME="datadog" AUTHORITY="http://ip-10-114-129-126/ganglia/" LOCALTIME="1337745303">
-<CLUSTER NAME="datadog" LOCALTIME="1337745300" OWNER="datadog" LATLONG="unspecified" URL="http://datadoghq.com">
+<GRID NAME="oneapm-ci-agent" AUTHORITY="http://ip-10-114-129-126/ganglia/" LOCALTIME="1337745303">
+<CLUSTER NAME="oneapm-ci-agent" LOCALTIME="1337745300" OWNER="oneapm-ci-agent" LATLONG="unspecified" URL="http://oneapm.com">
 <HOST NAME="ip-10-12-6-205.ec2.internal" IP="10.12.6.205" REPORTED="1337745294" TN="8" TMAX="20" DMAX="3600" LOCATION="ec2" GMOND_STARTED="1337694217">
 <METRIC NAME="machine_type" VAL="x86_64" TYPE="string" UNITS="" TN="686" TMAX="1200" DMAX="0" SLOPE="zero" SOURCE="gmond">
 <EXTRA_DATA>

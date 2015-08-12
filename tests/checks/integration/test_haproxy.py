@@ -14,7 +14,7 @@ from util import get_hostname
 class HaproxyTest(AgentCheckTest):
     CHECK_NAME = 'haproxy'
 
-    BACKEND_SERVICES = ['anotherbackend', 'datadog']
+    BACKEND_SERVICES = ['anotherbackend', 'oneapm-ci-agent']
 
     BACKEND_LIST = ['singleton:8080', 'singleton:8081', 'otherserver']
 
@@ -83,7 +83,7 @@ class HaproxyTest(AgentCheckTest):
         self.config = {
             "instances": [{
                 'url': 'http://localhost:3835/stats',
-                'username': 'datadog',
+                'username': 'oneapm-ci-agent',
                 'password': 'isdevops',
                 'status_check': True,
                 'collect_aggregates_only': False,
@@ -172,14 +172,14 @@ class HaproxyTest(AgentCheckTest):
 
     def test_check_service_filter(self):
         config = self.config
-        config['instances'][0]['services_include'] = ['datadog']
+        config['instances'][0]['services_include'] = ['oneapm-ci-agent']
         config['instances'][0]['services_exclude'] = ['.*']
         self.run_check_twice(config)
         shared_tag = ['instance_url:http://localhost:3835/stats']
 
-        self._test_backend_metrics(shared_tag, ['datadog'])
+        self._test_backend_metrics(shared_tag, ['oneapm-ci-agent'])
 
-        self._test_service_checks(['datadog'])
+        self._test_service_checks(['oneapm-ci-agent'])
 
         self.coverage_report()
 

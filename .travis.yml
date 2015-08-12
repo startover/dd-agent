@@ -27,7 +27,7 @@ env:
     - PIP_CACHE=$HOME/.cache/pip
     - SKIP_CLEANUP=true
     - VOLATILE_DIR=/tmp
-    - DD_CASHER_DIR=/tmp/casher
+    - CI_CASHER_DIR=/tmp/casher
   matrix:
     - TRAVIS_FLAVOR=default
     - TRAVIS_FLAVOR=core_integration

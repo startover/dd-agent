@@ -50,10 +50,10 @@ namespace :ci do
            -p 15432 -U $USER\
            postgres < $TRAVIS_BUILD_DIR/ci/resources/postgres/postgres.sql)
       sh %(#{pg_rootdir}/bin/psql\
-           -p 15432 -U datadog\
-           datadog_test < $TRAVIS_BUILD_DIR/ci/resources/postgres/datadog_test.sql)
+           -p 15432 -U oneapm_ci_agent\
+           oneapm_ci_agent_test < $TRAVIS_BUILD_DIR/ci/resources/postgres/oneapm_ci_agent_test.sql)
       sh %(#{pg_rootdir}/bin/psql\
-           -p 15432 -U datadog\
+           -p 15432 -U oneapm_ci_agent\
            dogs < $TRAVIS_BUILD_DIR/ci/resources/postgres/dogs.sql)
     end
 

@@ -577,7 +577,7 @@ class Processes(Check):
             processes.append(map(lambda s: s.strip(), line))
 
         return {'processes':   processes,
-                'apiKey':      agentConfig['api_key'],
+                'licenseKey':      agentConfig['license_key'],
                 'host':        get_hostname(agentConfig)}
 
 
@@ -622,7 +622,7 @@ class Cpu(Check):
                 # OR
                 #
                 # Thanks to Mart Visser to spotting this one.
-                # blah:/etc/dd-agent# mpstat
+                # blah:/etc/oneapm-ci-agent# mpstat
                 # Linux 2.6.26-2-xen-amd64 (atira)  02/17/2012  _x86_64_
                 #
                 # 05:27:03 PM  CPU    %user   %nice   %sys %iowait    %irq   %soft  %steal  %idle   intr/s
@@ -763,7 +763,7 @@ if __name__ == '__main__':
     mem = Memory(log)
     proc = Processes(log)
 
-    config = {"api_key": "666", "device_blacklist_re": re.compile('.*disk0.*')}
+    config = {"license_key": "666", "device_blacklist_re": re.compile('.*disk0.*')}
     while True:
         print("=" * 10)
         print("--- IO ---")

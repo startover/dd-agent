@@ -24,8 +24,8 @@ class TestPgbouncer(AgentCheckTest):
                 {
                     'host': 'localhost',
                     'port': 15433,
-                    'username': 'datadog',
-                    'password': 'datadog'
+                    'username': 'oneapm-ci-agent',
+                    'password': 'oneapm-ci-agent'
                 }
             ]
         }
@@ -51,9 +51,9 @@ class TestPgbouncer(AgentCheckTest):
             connection = pg.connect(
                 host='localhost',
                 port='15433',
-                user='datadog',
-                password='datadog',
-                database='datadog_test')
+                user='oneapm-ci-agent',
+                password='oneapm-ci-agent',
+                database='oneapm-ci-agent_test')
             connection.set_isolation_level(pg.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             cur = connection.cursor()
             cur.execute('SELECT * FROM persons;')

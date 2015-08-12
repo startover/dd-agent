@@ -20,7 +20,7 @@ setup_requires = []
 install_requires = []
 
 # Modified on mac
-app_name = 'datadog-agent'
+app_name = 'oneapm-ci-agent'
 # plist (used only on mac)
 plist = None
 
@@ -87,11 +87,11 @@ if sys.platform == 'win32':
         def __init__(self, **kw):
             self.__dict__.update(kw)
             self.version = get_version()
-            self.company_name = 'Datadog, Inc.'
-            self.copyright = 'Copyright 2013 Datadog, Inc.'
+            self.company_name = 'OneAPM, Inc.'
+            self.copyright = 'Copyright 2015 OneAPM, Inc.'
             self.cmdline_style = 'pywin32'
 
-    agent_svc = Target(name='Datadog Agent', modules='win32.agent', dest_base='ddagent')
+    agent_svc = Target(name='OneAPM CI Agent', modules='win32.agent', dest_base='ddagent')
 
     extra_args = {
         'options': {
@@ -110,7 +110,7 @@ if sys.platform == 'win32':
         'windows': [{'script': 'win32\gui.py',
                      'dest_base': "agent-manager",
                      'uac_info': "requireAdministrator", # The manager needs to be administrator to stop/start the service
-                     'icon_resources': [(1, r"packaging\datadog-agent\win32\install_files\dd_agent_win_256.ico")],
+                     'icon_resources': [(1, r"packaging\oneapm-ci-agent\win32\install_files\oneapm_ci_agent_win_256.ico")],
                      }],
         'data_files': [
             ("Microsoft.VC90.CRT", glob(r'C:\Python27\redist\*.*')),
@@ -120,12 +120,12 @@ if sys.platform == 'win32':
     }
 
 elif sys.platform == 'darwin':
-    app_name = 'Datadog Agent'
+    app_name = 'OneAPM CI Agent'
 
     from plistlib import Plist
     plist = Plist.fromFile(os.path.dirname(os.path.realpath(__file__)) + '/packaging/Info.plist')
     plist.update(dict(
-        CFBundleGetInfoString="{0}, Copyright (c) 2009-{1}, Datadog Inc.".format(
+        CFBundleGetInfoString="{0}, Copyright (c) 2008-{1}, OneAPM Inc.".format(
             get_version(), date.today().year),
         CFBundleVersion=get_version()
     ))
@@ -150,9 +150,9 @@ setup(
     name=app_name,
     version=get_version(),
     description="DevOps' best friend",
-    author='DataDog',
-    author_email='dev@datadoghq.com',
-    url='http://www.datadoghq.com',
+    author='OneAPM',
+    author_email='support@oneapm.com',
+    url='http://www.oneapm.com',
     install_requires=install_requires,
     setup_requires=setup_requires,
     packages=find_packages(),

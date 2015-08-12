@@ -30,7 +30,7 @@ def remove_control_chars(s):
 
 def http_emitter(message, log, agentConfig, endpoint):
     "Send payload"
-    url = agentConfig['dd_url']
+    url = agentConfig['ci_url']
 
     log.debug('http_emitter: attempting postback to ' + url)
 
@@ -46,11 +46,11 @@ def http_emitter(message, log, agentConfig, endpoint):
     log.debug("payload_size=%d, compressed_size=%d, compression_ratio=%.3f"
               % (len(payload), len(zipped), float(len(payload))/float(len(zipped))))
 
-    apiKey = message.get('apiKey', None)
-    if not apiKey:
+    licenseKey = message.get('licenseKey', None)
+    if not licenseKey:
         raise Exception("The http emitter requires an api key")
 
-    url = "{0}/intake/{1}?api_key={2}".format(url, endpoint, apiKey)
+    url = "{0}/intake/{1}?license_key={2}".format(url, endpoint, licenseKey)
 
     try:
         headers = post_headers(agentConfig, zipped)
@@ -71,10 +71,10 @@ def http_emitter(message, log, agentConfig, endpoint):
 
 def post_headers(agentConfig, payload):
     return {
-        'User-Agent': 'Datadog Agent/%s' % agentConfig['version'],
+        'User-Agent': 'OneAPM Agent/%s' % agentConfig['version'],
         'Content-Type': 'application/json',
         'Content-Encoding': 'deflate',
         'Accept': 'text/html, */*',
         'Content-MD5': md5(payload).hexdigest(),
-        'DD-Collector-Version': get_version()
+        'CI-Collector-Version': get_version()
     }

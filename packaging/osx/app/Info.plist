@@ -3,7 +3,7 @@
 <plist version="1.0">
     <dict>
         <key>CFBundleDisplayName</key>
-        <string>Datadog Agent</string>
+        <string>OneAPM Agent</string>
         <key>CFBundleExecutable</key>
         <string>gui</string>
         <key>CFBundleIconFile</key>
@@ -11,7 +11,7 @@
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleIdentifier</key>
-        <string>com.datadoghq.agent</string>
+        <string>com.oneapm.agent</string>
         <key>CFBundleSignature</key>
         <string>????</string>
         <key>LSUIElement</key>

@@ -7,8 +7,7 @@ namespace :ci do
     task install: ['ci:common:install']
 
     task before_script: ['ci:common:before_script']
-    # If you need to wait on a start of a progran, please use Wait.for,
-    # see https://github.com/DataDog/dd-agent/pull/1547
+    # If you need to wait on a start of a program, please use Wait.
 
     task script: ['ci:common:script'] do
       this_provides = [

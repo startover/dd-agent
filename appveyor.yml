@@ -1,14 +1,14 @@
 version: '{branch}.{build}'
 shallow_clone: true
 environment:
-  TRAVIS_BUILD_DIR: c:\projects\dd-agent
-  INTEGRATIONS_DIR: c:\projects\dd-agent\embedded
-  PIP_CACHE: c:\projects\dd-agent\.cache\pip
+  TRAVIS_BUILD_DIR: c:\projects\oneapm-ci-agent
+  INTEGRATIONS_DIR: c:\projects\oneapm-ci-agent\embedded
+  PIP_CACHE: c:\projects\oneapm-ci-agent\.cache\pip
   VOLATILE_DIR: c:\projects
   NOSE_FILTER: windows
   FLAVORS: windows
   COVERAGE: true
-  PYWIN_PATH: C:\projects\dd-agent\.cache\pywin32-py2.7.exe
+  PYWIN_PATH: C:\projects\oneapm-ci-agent\.cache\pywin32-py2.7.exe
   matrix:
   - PYTHON: C:\\Python27
     PYTHON_VERSION: 2.7.9
@@ -19,9 +19,9 @@ environment:
     PYTHON_ARCH: 64
     PYWIN32_URL: http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win-amd64-py2.7.exe/download
 cache:
-  - C:\projects\dd-agent\.cache
-  - C:\projects\dd-agent\vendor\cache
-  - C:\projects\dd-agent\embedded
+  - C:\projects\oneapm-ci-agent\.cache
+  - C:\projects\oneapm-ci-agent\vendor\cache
+  - C:\projects\oneapm-ci-agent\embedded
 install:
   - gem install bundler --quiet --no-ri --no-rdoc
   - bundle install

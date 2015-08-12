@@ -7,7 +7,7 @@ import unittest
 # project
 import modules
 
-log = logging.getLogger('datadog.test')
+log = logging.getLogger('oneapm.agent.test')
 
 TARGET_MODULE = 'tests.core.fixtures.target_module'
 default_target = 'DEFAULT'

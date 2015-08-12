@@ -245,7 +245,7 @@ class TokuMX(AgentCheck):
         self.event({
             'timestamp': int(time.time()),
             'event_type': 'tokumx',
-            'api_key': agentConfig['api_key'],
+            'license_key': agentConfig['license_key'],
             'msg_title': msg_title,
             'msg_text': msg,
             'host': hostname
